@@ -206,4 +206,4 @@ async function getRevenueAnalytics(whereClause, params, timeframe) {
     revenue_by_status: revenueByStatus,
     weekly_revenue: weeklyRevenue
   };
-}"
+}

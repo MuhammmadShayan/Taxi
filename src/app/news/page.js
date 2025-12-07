@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Header from '../../components/Header';
-import Footer from '../../components/footers/Footer';
+import Footer from '../../components/Footer';
 import SubscribeForm from '../../components/SubscribeForm';
 import SignupModal from '../../components/SignupModal';
 import LoginModal from '../../components/LoginModal';

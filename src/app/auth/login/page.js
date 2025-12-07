@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import WorkingLoginForm from '../../../components/WorkingLoginForm';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const searchParams = useSearchParams();
   const message = searchParams.get('message');
 
@@ -87,3 +87,12 @@ export default function LoginPage() {
     </>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+export const dynamic = 'force-dynamic';

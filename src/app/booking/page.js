@@ -477,10 +477,7 @@ function BookingContent() {
     if (!customerData.lastName.trim()) errors.push('Last name is required');
     if (!customerData.email.trim()) errors.push('Email is required');
     if (!customerData.phone.trim()) errors.push('Phone number is required');
-    if (!customerData.dateOfBirth) errors.push('Date of birth is required');
-    if (!customerData.nationality) errors.push('Nationality is required');
-    // Driver license only required for guest users (not logged in users)
-    if (!user && !customerData.license.trim()) errors.push('Driver license is required');
+    // Removed dateOfBirth, nationality, license validation as fields are hidden
 
     // Payment validation
     if (paymentData.method === 'credit_card') {
@@ -743,7 +740,8 @@ function BookingContent() {
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
                                 <select 
-                                  className="select-contain-select"
+                                  className="select-contain-select form-control"
+                                  data-no-select2="true"
                                   value={bookingData.pickup_time}
                                   onChange={(e) => handleBookingChange('pickup_time', e.target.value)}
                                   required
@@ -778,7 +776,8 @@ function BookingContent() {
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
                                 <select 
-                                  className="select-contain-select"
+                                  className="select-contain-select form-control"
+                                  data-no-select2="true"
                                   value={bookingData.dropoff_time}
                                   onChange={(e) => handleBookingChange('dropoff_time', e.target.value)}
                                   required
@@ -839,7 +838,8 @@ function BookingContent() {
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
                                 <select 
-                                  className="select-contain-select"
+                                  className="select-contain-select form-control"
+                                  data-no-select2="true"
                                   value={customerData.title}
                                   onChange={(e) => handleCustomerChange('title', e.target.value)}
                                   required
@@ -1075,74 +1075,7 @@ function BookingContent() {
                             </div>
                           </div>
                         </div>
-                        <div className="col-lg-6 responsive-column">
-                          <div className="input-box">
-                            <label className="label-text">Date of Birth</label>
-                            <div className="form-group">
-                              <span className="la la-calendar form-icon"></span>
-                              <input
-                                className="form-control"
-                                type="date"
-                                value={customerData.dateOfBirth}
-                                onChange={(e) => handleCustomerChange('dateOfBirth', e.target.value)}
-                                max={maxBirthDateString}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-lg-6 responsive-column">
-                          <div className="input-box">
-                            <label className="label-text">Nationality</label>
-                            <div className="form-group select2-container-wrapper">
-                              <div className="select-contain w-auto">
-                                <select 
-                                  className="select-contain-select"
-                                  value={customerData.nationality}
-                                  onChange={(e) => handleCustomerChange('nationality', e.target.value)}
-                                  required
-                                >
-                                  <option value="">Select Nationality</option>
-                                  {countries.map(country => (
-                                    <option key={country} value={country}>{country}</option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-lg-6 responsive-column">
-                          <div className="input-box">
-                            <label className="label-text">Passport Number <small className="text-muted">(Optional)</small></label>
-                            <div className="form-group">
-                              <span className="la la-id-card form-icon"></span>
-                              <input
-                                className="form-control"
-                                type="text"
-                                value={customerData.passport}
-                                onChange={(e) => handleCustomerChange('passport', e.target.value)}
-                                placeholder="Passport number (optional)"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-lg-6 responsive-column">
-                          <div className="input-box">
-                            <label className="label-text">
-                              Driver License Number <small className="text-muted">(Optional)</small>
-                            </label>
-                            <div className="form-group">
-                              <span className="la la-id-card-o form-icon"></span>
-                              <input
-                                className="form-control"
-                                type="text"
-                                value={customerData.license}
-                                onChange={(e) => handleCustomerChange('license', e.target.value)}
-                                placeholder="Driver license number (optional)"
-                              />
-                            </div>
-                          </div>
-                        </div>
+                        {/* Removed Date of Birth, Nationality, Passport, License fields as requested */}
                         <div className="col-lg-12">
                           <div className="input-box">
                             <label className="label-text">Address</label>
@@ -1179,7 +1112,8 @@ function BookingContent() {
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
                                 <select 
-                                  className="select-contain-select"
+                                  className="select-contain-select form-control"
+                                  data-no-select2="true"
                                   value={customerData.country}
                                   onChange={(e) => handleCustomerChange('country', e.target.value)}
                                 >

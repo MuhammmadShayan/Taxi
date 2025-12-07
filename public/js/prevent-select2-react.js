@@ -55,7 +55,7 @@
       jQuery.fn.select2.amd = originalSelect2.amd;
     }
     
-    console.log('✅ Select2 protection enabled for React components');
+    // console.log('✅ Select2 protection enabled for React components');
   }
   
   // Run when DOM is ready

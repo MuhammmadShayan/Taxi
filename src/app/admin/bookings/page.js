@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import AdminLayout from '../../../components/AdminLayout';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Chat from '@/components/Chat';
 
-export default function AdminBookings() {
+function AdminBookingsContent() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -515,3 +515,12 @@ export default function AdminBookings() {
   );
 }
 
+export default function AdminBookings() {
+  return (
+    <Suspense fallback={<div />}>
+      <AdminBookingsContent />
+    </Suspense>
+  );
+}
+
+export const dynamic = 'force-dynamic';

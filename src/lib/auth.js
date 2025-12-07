@@ -88,6 +88,11 @@ export async function getCurrentSession() {
   }
 }
 
+// Compatibility alias for existing routes
+export async function getSession() {
+  return await getCurrentSession();
+}
+
 // Check if user has specific permission
 export function hasPermission(user, permission) {
   if (!user || !user.user_type) {

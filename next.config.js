@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Server-side rendering optimizations for Next.js 15
-  serverExternalPackages: ['mysql2'],
+  // Server-side rendering optimizations for Next.js
 
   // Image optimization configuration
   images: {
@@ -214,7 +213,7 @@ const nextConfig = {
   // Performance optimizations for development
   experimental: {
     // Optimize CSS handling
-    optimizeCss: process.env.NODE_ENV === 'production',
+    optimizeCss: false,
     // Skip unused CSS in development
     optimizePackageImports: ['lodash', 'react-icons'],
   }

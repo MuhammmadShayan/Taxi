@@ -1,22 +1,10 @@
 {
   "version": 2,
-  "name": "holikey-platform",
-  "alias": ["holikey.com", "www.holikey.com"],
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  },
   "env": {
     "APP_NAME": "HOLIKEY",
-    "APP_URL": "https://holikey.com",
     "NODE_ENV": "production"
   },
-  "functions": {
-    "src/app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
+  
   "redirects": [
     {
       "source": "/kirastay/(.*)",
@@ -40,7 +28,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://holikey.com"
+          "value": "*"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -72,20 +60,6 @@
           "value": "camera=(), microphone=(), geolocation=(self)"
         }
       ]
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/webhooks/stripe",
-      "methods": ["POST"]
-    },
-    {
-      "src": "/sitemap.xml",
-      "dest": "/api/sitemap"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/api/robots"
     }
   ]
 }

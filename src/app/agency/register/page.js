@@ -133,11 +133,11 @@ export default function AgencyRegister() {
       return false;
     }
 
-    // Navigation system validation
-    if (!formData.navigation_system) {
-      setError('Please specify if you provide navigation system');
-      return false;
-    }
+    // Navigation system validation removed
+    // if (!formData.navigation_system) {
+    //   setError('Please specify if you provide navigation system');
+    //   return false;
+    // }
 
     return true;
   };
@@ -462,45 +462,10 @@ export default function AgencyRegister() {
                         </div>
                       </div>
 
-                      {/* Row 4: Navigation + Role */}
+                      {/* Row 4: Role (Navigation removed) */}
                       <div className="form-section mb-3">
                         <div className="row">
-                          <div className="col-lg-8">
-                            <h5 className="form-section-title">
-                              <i className="la la-compass me-2"></i>Navigation System *
-                            </h5>
-                            <div className="radio-option">
-                              <div className="row">
-                                <div className="col-6">
-                                  <div className="custom-radio">
-                                    <input
-                                      type="radio"
-                                      id="navigation_yes"
-                                      name="navigation_system"
-                                      value="yes"
-                                      checked={formData.navigation_system === 'yes'}
-                                      onChange={(e) => handleInputChange('navigation_system', e.target.value)}
-                                    />
-                                    <label htmlFor="navigation_yes">Yes, GPS available</label>
-                                  </div>
-                                </div>
-                                <div className="col-6">
-                                  <div className="custom-radio">
-                                    <input
-                                      type="radio"
-                                      id="navigation_no"
-                                      name="navigation_system"
-                                      value="no"
-                                      checked={formData.navigation_system === 'no'}
-                                      onChange={(e) => handleInputChange('navigation_system', e.target.value)}
-                                    />
-                                    <label htmlFor="navigation_no">No GPS</label>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-lg-4">
+                          <div className="col-lg-12">
                             <h5 className="form-section-title">
                               <i className="la la-briefcase me-2"></i>Role
                             </h5>
@@ -520,83 +485,7 @@ export default function AgencyRegister() {
                         </div>
                       </div>
 
-                      {/* Row 5: Child Seats */}
-                      <div className="form-section mb-3">
-                        <h5 className="form-section-title">
-                          <i className="la la-child me-2"></i>Child Seat Options
-                        </h5>
-                        <div className="row">
-                          <div className="col-lg-4">
-                            <div className="custom-checkbox">
-                              <input
-                                type="checkbox"
-                                id="baby_seat"
-                                checked={formData.baby_seat}
-                                onChange={(e) => handleInputChange('baby_seat', e.target.checked)}
-                              />
-                              <label htmlFor="baby_seat">Baby seat (0-1y)</label>
-                            </div>
-                            {formData.baby_seat && (
-                              <div className="form-group mt-1">
-                                <input
-                                  className="form-control form-control-sm"
-                                  type="number"
-                                  value={formData.baby_seat_price}
-                                  onChange={(e) => handleInputChange('baby_seat_price', e.target.value)}
-                                  placeholder="Price MAD"
-                                  min="0"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="col-lg-4">
-                            <div className="custom-checkbox">
-                              <input
-                                type="checkbox"
-                                id="child_seat"
-                                checked={formData.child_seat}
-                                onChange={(e) => handleInputChange('child_seat', e.target.checked)}
-                              />
-                              <label htmlFor="child_seat">Child seat (1-4y)</label>
-                            </div>
-                            {formData.child_seat && (
-                              <div className="form-group mt-1">
-                                <input
-                                  className="form-control form-control-sm"
-                                  type="number"
-                                  value={formData.child_seat_price}
-                                  onChange={(e) => handleInputChange('child_seat_price', e.target.value)}
-                                  placeholder="Price MAD"
-                                  min="0"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="col-lg-4">
-                            <div className="custom-checkbox">
-                              <input
-                                type="checkbox"
-                                id="booster_seat"
-                                checked={formData.booster_seat}
-                                onChange={(e) => handleInputChange('booster_seat', e.target.checked)}
-                              />
-                              <label htmlFor="booster_seat">Booster seat (4-12y)</label>
-                            </div>
-                            {formData.booster_seat && (
-                              <div className="form-group mt-1">
-                                <input
-                                  className="form-control form-control-sm"
-                                  type="number"
-                                  value={formData.booster_seat_price}
-                                  onChange={(e) => handleInputChange('booster_seat_price', e.target.value)}
-                                  placeholder="Price MAD"
-                                  min="0"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      {/* Row 5: Child Seats Removed */}
 
                       {/* Row 7: Login Information */}
                       <div className="form-section mb-3">

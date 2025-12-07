@@ -83,7 +83,7 @@
                 });
             }
             
-            console.log('✅ Dashboard sparkline charts initialized successfully');
+            // console.log('✅ Dashboard sparkline charts initialized successfully');
         } catch (error) {
             console.warn('❌ Dashboard initialization error:', error);
         }

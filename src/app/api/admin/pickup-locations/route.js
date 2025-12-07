@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { query } from '../../../../../lib/db';
-import { verifySessionToken } from '../../../../../lib/auth';
+import { query } from '../../../../lib/db';
+import { verifySessionToken } from '../../../../lib/auth';
 
 // GET /api/admin/pickup-locations
 export async function GET(request) {

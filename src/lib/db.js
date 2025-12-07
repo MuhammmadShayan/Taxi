@@ -3,19 +3,48 @@ import mysql from 'mysql2';
 let pool;
 
 export function getDbPool() {
-	if (!pool) {
-		pool = mysql.createPool({
-			host: process.env.DB_HOST || '127.0.0.1',
-			user: process.env.DB_USER || 'root',
-			password: process.env.DB_PASSWORD || '',
-			database: process.env.DB_NAME || 'my_travel_app',
-			port: Number(process.env.DB_PORT || 3306),
-			waitForConnections: true,
-			connectionLimit: 10,
-			queueLimit: 0,
-		}).promise();
-	}
-	return pool;
+    if (!pool) {
+        // Support DATABASE_URL (mysql://user:pass@host:port/dbname)
+        const url = process.env.DATABASE_URL;
+        let config;
+        if (url) {
+            try {
+                const u = new URL(url);
+                config = {
+                    host: u.hostname,
+                    user: decodeURIComponent(u.username),
+                    password: decodeURIComponent(u.password),
+                    database: u.pathname.replace(/^\//, ''),
+                    port: Number(u.port || 3306),
+                    waitForConnections: true,
+                    connectionLimit: 10,
+                    queueLimit: 0,
+                    multipleStatements: true, // Allow multiple statements for imports
+                };
+            } catch (e) {
+                console.error('Invalid DATABASE_URL, falling back to discrete env vars:', e.message);
+            }
+        }
+        if (!config) {
+            config = {
+                host: process.env.DB_HOST || 'webhosting2026.is.cc',
+                user: process.env.DB_USER || 'smartes_my_travel_app',
+                password: process.env.DB_PASSWORD || 'my_travel_app_2025',
+                database: process.env.DB_NAME || 'smartes_my_travel_app',
+                port: Number(process.env.DB_PORT || 3306),
+                waitForConnections: true,
+                connectionLimit: 10,
+                queueLimit: 0,
+                multipleStatements: true, // Allow multiple statements for imports
+            };
+        }
+        // Optional TLS for managed providers; enable only if explicitly requested
+        if (process.env.DB_SSL === 'true') {
+            config.ssl = {};
+        }
+        pool = mysql.createPool(config).promise();
+    }
+    return pool;
 }
 
 export async function query(sql, params = []) {

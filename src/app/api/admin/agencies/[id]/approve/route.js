@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '../../../../../../lib/db';
+import { query } from '../../../../../../lib/db';
 import { sendEmail } from '../../../../../../utils/emailService';
 import { agencyApprovalNotification } from '../../../../../../utils/emailTemplates';
 
@@ -11,7 +11,7 @@ export async function PUT(request, { params }) {
     console.log(`📋 Processing agency ${approved ? 'approval' : 'rejection'} for ID:`, agencyId);
 
     // Get agency details
-    const [agencyDetails] = await pool.execute(`
+    const agencyDetails = await query(`
       SELECT a.*, u.first_name, u.last_name, u.email 
       FROM agencies a 
       LEFT JOIN users u ON a.user_id = u.user_id 
@@ -29,14 +29,14 @@ export async function PUT(request, { params }) {
 
     // Update agency status
     const newStatus = approved ? 'active' : 'rejected';
-    await pool.execute(
+    await query(
       'UPDATE agencies SET status = ?, updated_at = NOW() WHERE agency_id = ?',
       [newStatus, agencyId]
     );
 
     // Update user status
     const userStatus = approved ? 'active' : 'suspended';
-    await pool.execute(
+    await query(
       'UPDATE users SET status = ?, updated_at = NOW() WHERE user_id = ?',
       [userStatus, agency.user_id]
     );
@@ -44,7 +44,7 @@ export async function PUT(request, { params }) {
     // Store rejection reason if applicable
     if (!approved && rejection_reason) {
       try {
-        await pool.execute(`
+        await query(`
           INSERT INTO agency_rejections (agency_id, reason, rejected_at, rejected_by)
           VALUES (?, ?, NOW(), 'admin')
         `, [agencyId, rejection_reason]);

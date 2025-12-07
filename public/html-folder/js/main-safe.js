@@ -116,7 +116,7 @@ Includes proper null checks and error handling
                         dropdownMenu.parent('li').children('a, .nav-link-wrapper').append(function() {
                             return '<button class="drop-menu-toggler" type="button"><i class="la la-angle-down"></i></button>';
                         });
-                        console.log('✅ Dropdown menu togglers added successfully');
+                        // console.log('✅ Dropdown menu togglers added successfully');
                     }
                 }, 100);
             } catch (err) {
@@ -316,7 +316,7 @@ Includes proper null checks and error handling
                 
                 // Initialize with options
                 element.owlCarousel(options);
-                console.log('✅ ' + name + ' initialized successfully');
+                // console.log('✅ ' + name + ' initialized successfully');
             } catch (err) {
                 console.warn('❌ ' + name + ' initialization error:', err);
             }
@@ -458,7 +458,7 @@ Includes proper null checks and error handling
                         });
                     }
                 });
-                console.log('✅ ' + name + ' initialized successfully');
+                // console.log('✅ ' + name + ' initialized successfully');
             } catch (err) {
                 console.warn('❌ ' + name + ' initialization error:', err);
             }
@@ -594,7 +594,7 @@ Includes proper null checks and error handling
             console.warn('Year display error:', err);
         }
 
-        console.log('✅ All components initialized safely');
+        // console.log('✅ All components initialized safely');
     }
 
 })(typeof jQuery !== 'undefined' ? jQuery : null);

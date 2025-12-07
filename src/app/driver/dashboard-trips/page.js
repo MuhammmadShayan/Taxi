@@ -91,43 +91,26 @@ export default function DriverDashboardTrips() {
 
   if (loading) {
     return (
-      <>
-        pageTitle="My Trips"
-        breadcrumbItems={[{ label: 'Home', href: '/' }, { label: 'Dashboard', href: '/driver' }, { label: 'My Trips' }]}
-        showStats={false}
-      >
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-3">Loading trips...</p>
+      <div className="text-center py-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
         </div>
-      </>
+        <p className="mt-3">Loading trips...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
-        pageTitle="My Trips"
-        breadcrumbItems={[{ label: 'Home', href: '/' }, { label: 'Dashboard', href: '/driver' }, { label: 'My Trips' }]}
-        showStats={false}
-      >
-        <div className="alert alert-danger text-center">
-          <i className="la la-exclamation-triangle me-2"></i>
-          {error}
-        </div>
-      </>
+      <div className="alert alert-danger text-center">
+        <i className="la la-exclamation-triangle me-2"></i>
+        {error}
+      </div>
     );
   }
 
   return (
     <>
-      pageTitle="My Trips"
-      breadcrumbItems={[{ label: 'Home', href: '/' }, { label: 'Dashboard', href: '/driver' }, { label: 'My Trips' }]}
-      showStats={true}
-      statsCards={statsCards}
-    >
       {/* Main Trips Content */}
               <div className="row">
                 <div className="col-lg-12">

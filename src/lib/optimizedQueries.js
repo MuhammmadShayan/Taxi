@@ -114,6 +114,58 @@ export async function batchInsertExtras(reservationId, extras) {
   }
 }
 
+// Basic booking statistics aggregation
+export async function getBookingStats(filters = {}) {
+  try {
+    const params = [];
+    let where = 'WHERE 1=1';
+    if (filters.agencyId) {
+      where += ' AND r.agency_id = ?';
+      params.push(filters.agencyId);
+    }
+    if (filters.dateFrom) {
+      where += ' AND r.created_at >= ?';
+      params.push(filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      where += ' AND r.created_at <= ?';
+      params.push(filters.dateTo);
+    }
+
+    const [row] = await query(
+      `SELECT 
+        COUNT(*) as total_bookings,
+        COUNT(CASE WHEN r.status = 'pending' THEN 1 END) as pending_bookings,
+        COUNT(CASE WHEN r.status = 'confirmed' THEN 1 END) as active_bookings,
+        COUNT(CASE WHEN r.status = 'completed' THEN 1 END) as completed_bookings,
+        COUNT(CASE WHEN r.status = 'cancelled' THEN 1 END) as cancelled_bookings,
+        SUM(CASE WHEN r.status = 'completed' THEN r.total_price ELSE 0 END) as total_revenue
+      FROM reservations r
+      ${where}`,
+      params
+    );
+
+    return {
+      total_bookings: row?.total_bookings || 0,
+      pending_bookings: row?.pending_bookings || 0,
+      active_bookings: row?.active_bookings || 0,
+      completed_bookings: row?.completed_bookings || 0,
+      cancelled_bookings: row?.cancelled_bookings || 0,
+      total_revenue: Number(row?.total_revenue || 0),
+    };
+  } catch (error) {
+    console.error('getBookingStats error:', error);
+    return {
+      total_bookings: 0,
+      pending_bookings: 0,
+      active_bookings: 0,
+      completed_bookings: 0,
+      cancelled_bookings: 0,
+      total_revenue: 0,
+    };
+  }
+}
+
 /**
  * Get paginated list of bookings with filters
  */

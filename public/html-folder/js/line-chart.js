@@ -8,7 +8,7 @@
         
         // Check if element exists and Chart.js is available
         if (!ctx || typeof Chart === 'undefined') {
-            console.log('Line chart element not found or Chart.js not available - skipping initialization');
+            // console.log('Line chart element not found or Chart.js not available - skipping initialization');
             return;
         }
         

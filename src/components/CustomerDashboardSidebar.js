@@ -199,8 +199,6 @@ export default function CustomerDashboardSidebar() {
           Contact Support
         </Link>
       </div>
-    </div>
-
       <style jsx>{`
         .dashboard-nav-sidebar {
           width: 280px;

@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AdminLayout from '../../../../components/AdminLayout';
 
-export default function AssignBooking() {
+function AssignBookingContent() {
   const [vehicles, setVehicles] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -160,3 +160,12 @@ export default function AssignBooking() {
     </AdminLayout>
   );
 }
+
+export default function AssignBooking() {
+  return (
+    <Suspense fallback={<div />}>
+      <AssignBookingContent />
+    </Suspense>
+  );
+}
+export const dynamic = 'force-dynamic';

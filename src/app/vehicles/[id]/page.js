@@ -182,6 +182,9 @@ function VehicleDetailContent() {
     
     if (!isReadOnlyBooking) {
       router.push(`/booking?${bookingParams.toString()}`);
+    } else {
+      // Even if read-only (all params present), clicking "Book Now" should take them to the booking page to finalize
+      router.push(`/booking?${bookingParams.toString()}`);
     }
   };
 
@@ -876,15 +879,14 @@ function VehicleDetailContent() {
                             </div>
                           </div>
                           <div className="btn-box pt-2">
-                            <button
-                              type="button"
-                              className="theme-btn text-center w-100 mb-2"
-                              disabled={isReadOnlyBooking || !bookingForm.pickup_location || !bookingForm.pickup_date || !bookingForm.dropoff_date || priceLoading}
-                              onClick={handleBooking}
+                            <Link
+                              href={`/booking?vehicle_id=${params.id}&pickup_location=${encodeURIComponent(bookingForm.pickup_location)}&dropoff_location=${encodeURIComponent(bookingForm.dropoff_location)}&pickup_date=${bookingForm.pickup_date}&pickup_time=${bookingForm.pickup_time}&dropoff_date=${bookingForm.dropoff_date}&dropoff_time=${bookingForm.dropoff_time}&passengers=${bookingForm.passengers}`}
+                              className={`theme-btn text-center w-100 mb-2 d-block text-decoration-none ${(!bookingForm.pickup_location || !bookingForm.pickup_date || !bookingForm.dropoff_date || priceLoading) ? 'disabled' : ''}`}
+                              style={{ pointerEvents: (!bookingForm.pickup_location || !bookingForm.pickup_date || !bookingForm.dropoff_date || priceLoading) ? 'none' : 'auto', opacity: (!bookingForm.pickup_location || !bookingForm.pickup_date || !bookingForm.dropoff_date || priceLoading) ? 0.65 : 1 }}
                             >
                               <i className="la la-shopping-cart me-2 font-size-18"></i>
                               {priceLoading ? 'Calculating...' : `Book Now${currentPricing ? ` - $${currentPricing.base_total}` : ''}`}
-                            </button>
+                            </Link>
                             <button
                               type="button"
                               className="theme-btn text-center w-100 theme-btn-transparent"
@@ -1034,10 +1036,10 @@ function VehicleDetailContent() {
                             <button 
                               type="submit" 
                               className="theme-btn text-center w-100 mb-2"
-                              disabled={isReadOnlyBooking || !bookingForm.pickup_location || !bookingForm.pickup_date || !bookingForm.dropoff_date || priceLoading}
+                              disabled={!bookingForm.pickup_location || !bookingForm.pickup_date || !bookingForm.dropoff_date || priceLoading}
                             >
                               <i className="la la-shopping-cart me-2 font-size-18"></i>
-                              {isReadOnlyBooking ? 'Booking Details View' : (priceLoading ? 'Calculating...' : `Book Now${currentPricing ? ` - $${currentPricing.base_total}` : ''}`)}
+                              {isReadOnlyBooking ? 'Book Now' : (priceLoading ? 'Calculating...' : `Book Now${currentPricing ? ` - $${currentPricing.base_total}` : ''}`)}
                             </button>
                             <button
                               type="button"

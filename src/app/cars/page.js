@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '../../components/Header';
@@ -8,7 +8,7 @@ import Footer from '../../components/Footer';
 import Breadcrumb from '../../components/Breadcrumb';
 import { useI18n } from '../../i18n/I18nProvider';
 
-export default function CarListing() {
+function CarListingContent() {
   const { t } = useI18n();
   const searchParams = useSearchParams();
   const [cars, setCars] = useState([]);
@@ -1201,3 +1201,12 @@ export default function CarListing() {
     </>
   );
 }
+
+export default function CarListing() {
+  return (
+    <Suspense fallback={<div />}>
+      <CarListingContent />
+    </Suspense>
+  );
+}
+export const dynamic = 'force-dynamic';
