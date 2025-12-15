@@ -96,20 +96,18 @@ export default function CarSingle({ params }) {
     }
     
     const urlParams = new URLSearchParams({
+      vehicle_id: params.id,
       pickup_location: formData.pickup_location,
       dropoff_location: formData.dropoff_location || formData.pickup_location,
-      start_date: formData.pickup_date,
-      end_date: formData.dropoff_date,
+      pickup_date: formData.pickup_date,
       pickup_time: formData.pickup_time,
+      dropoff_date: formData.dropoff_date,
       dropoff_time: formData.dropoff_time,
-      car_type: '1',
-      rental_company: '',
-      discount_code: '0',
-      preselected_car: params.id
+      passengers: formData.passengers
     });
     
-    console.log('Navigating to:', `/search?${urlParams.toString()}`);
-    router.push(`/search?${urlParams.toString()}`);
+    console.log('Navigating to:', `/booking?${urlParams.toString()}`);
+    router.push(`/booking?${urlParams.toString()}`);
   };
 
   if (error) {
