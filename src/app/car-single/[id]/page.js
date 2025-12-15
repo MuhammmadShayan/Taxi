@@ -190,6 +190,11 @@ export default function CarSingle({ params }) {
       <link rel="stylesheet" href="/html-folder/css/flag-icon.min.css" />
       <link rel="stylesheet" href="/html-folder/css/style.css" />
       <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
+      <style dangerouslySetInnerHTML={{__html: `
+        .sidebar-widget .form-group .form-icon.la.la-calendar { color: #000 !important; opacity: 1 !important; z-index: 9; }
+        .sidebar-widget input[type="date"]::-webkit-calendar-picker-indicator { opacity: 1 !important; filter: brightness(0) !important; z-index: 10; cursor: pointer; }
+        .sidebar-widget input[type="date"] { color: #0d233e; position: relative; }
+      `}} />
       
       <Header />
       
@@ -747,37 +752,6 @@ export default function CarSingle({ params }) {
                                   <option value="5:00PM">5:00PM</option>
                                   <option value="6:00PM">6:00PM</option>
                                 </select>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="input-box">
-                            <div className="form-group">
-                              <div className="qty-box mb-2 d-flex align-items-center justify-content-between">
-                                <label className="font-size-16 color-text-2">Passengers</label>
-                                <div className="qtyBtn d-flex align-items-center">
-                                  <div 
-                                    className="qtyDec"
-                                    onClick={() => handlePassengerChange(-1)}
-                                    style={{cursor: 'pointer'}}
-                                  >
-                                    <i className="la la-minus"></i>
-                                  </div>
-                                  <input 
-                                    type="text" 
-                                    name="passengers" 
-                                    value={formData.passengers} 
-                                    readOnly
-                                    style={{textAlign: 'center', width: '50px'}}
-                                  />
-                                  <div 
-                                    className="qtyInc"
-                                    onClick={() => handlePassengerChange(1)}
-                                    style={{cursor: 'pointer'}}
-                                  >
-                                    <i className="la la-plus"></i>
-                                  </div>
-                                </div>
                               </div>
                             </div>
                           </div>
