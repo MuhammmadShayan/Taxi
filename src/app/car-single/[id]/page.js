@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import { useCurrency } from '../../../contexts/CurrencyContext';
+import LocationAutocomplete from '../../../components/LocationAutocomplete';
 
 export default function CarSingle({ params }) {
   const router = useRouter();
@@ -68,6 +69,14 @@ export default function CarSingle({ params }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePickupPlaceSelect = (place) => {
+    setFormData(prev => ({ ...prev, pickup_location: place.formatted_address || place.name }));
+  };
+
+  const handleDropoffPlaceSelect = (place) => {
+    setFormData(prev => ({ ...prev, dropoff_location: place.formatted_address || place.name }));
   };
   
   const handlePassengerChange = (increment) => {
@@ -637,15 +646,14 @@ export default function CarSingle({ params }) {
                             <label className="label-text">Pick-up From</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                              <input
-                                className="form-control"
-                                type="text"
-                                name="pickup_location"
-                                value={formData.pickup_location}
-                                onChange={handleInputChange}
-                                placeholder="Destination, city, or airport"
-                                required
-                              />
+                                <LocationAutocomplete
+                                  placeholder="Destination, city, or airport"
+                                  onPlaceSelect={handlePickupPlaceSelect}
+                                  value={formData.pickup_location}
+                                  onChange={(value) => setFormData(prev => ({ ...prev, pickup_location: value }))}
+                                  className="form-control"
+                                  required
+                                />
                             </div>
                           </div>
                           
@@ -653,14 +661,13 @@ export default function CarSingle({ params }) {
                             <label className="label-text">Drop-off to</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                              <input
-                                className="form-control"
-                                type="text"
-                                name="dropoff_location"
-                                value={formData.dropoff_location}
-                                onChange={handleInputChange}
-                                placeholder="Different location (optional)"
-                              />
+                                <LocationAutocomplete
+                                  placeholder="Different location (optional)"
+                                  onPlaceSelect={handleDropoffPlaceSelect}
+                                  value={formData.dropoff_location}
+                                  onChange={(value) => setFormData(prev => ({ ...prev, dropoff_location: value }))}
+                                  className="form-control"
+                                />
                             </div>
                           </div>
                           

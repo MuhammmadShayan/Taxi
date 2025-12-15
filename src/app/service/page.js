@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Head from 'next/head';
+import Script from 'next/script';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import SignupModal from '../../components/SignupModal';
@@ -11,31 +12,6 @@ import SubscribeForm from '../../components/SubscribeForm';
 
 export default function ServicesPage() {
   const { t } = useI18n();
-  useEffect(() => {
-    const scripts = [
-      '/html-folder/js/jquery-3.7.1.min.js',
-      '/html-folder/js/jquery-ui.js',
-      '/html-folder/js/bootstrap.bundle.min.js',
-      '/html-folder/js/select2.min.js',
-      '/html-folder/js/moment.min.js',
-      '/html-folder/js/daterangepicker.js',
-      '/html-folder/js/owl.carousel.min.js',
-      '/html-folder/js/jquery.fancybox.min.js',
-      '/html-folder/js/jquery.countTo.min.js',
-      '/html-folder/js/animated-headline.js',
-      '/html-folder/js/jquery.ripples-min.js',
-      '/html-folder/js/quantity-input.js',
-      '/html-folder/js/main.js',
-    ];
-
-    scripts.forEach((src) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      document.body.appendChild(script);
-      return () => document.body.removeChild(script);
-    });
-  }, []);
 
   const services = [
     {
@@ -233,6 +209,21 @@ export default function ServicesPage() {
       
       <SignupModal />
       <LoginModal />
+
+      {/* Scripts */}
+      <Script src="/html-folder/js/jquery-3.7.1.min.js" strategy="beforeInteractive" />
+      <Script src="/html-folder/js/jquery-ui.js" strategy="beforeInteractive" />
+      <Script src="/html-folder/js/bootstrap.bundle.min.js" strategy="beforeInteractive" />
+      <Script src="/html-folder/js/select2.min.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/moment.min.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/daterangepicker.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/owl.carousel.min.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/jquery.fancybox.min.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/jquery.countTo.min.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/animated-headline.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/jquery.ripples-min.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/quantity-input.js" strategy="afterInteractive" />
+      <Script src="/html-folder/js/main.js" strategy="afterInteractive" />
     </>
   );
 }
