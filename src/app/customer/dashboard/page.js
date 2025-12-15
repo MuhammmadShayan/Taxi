@@ -156,7 +156,7 @@ export default function CustomerDashboard() {
                       </Link>
                     </div>
                     <div className="col-lg-6 mb-3">
-                      <Link href="/search" className="d-block text-decoration-none">
+                      <Link href="/" className="d-block text-decoration-none">
                         <div className="card h-100 text-center hover-card">
                           <div className="card-body">
                             <i className="la la-search display-4 text-success mb-3"></i>
@@ -239,7 +239,7 @@ export default function CustomerDashboard() {
                     <div className="text-center py-4">
                       <i className="la la-car display-4 text-muted mb-3"></i>
                       <p className="text-muted">No recent bookings</p>
-                      <Link href="/search" className="btn btn-primary btn-sm">
+                      <Link href="/" className="btn btn-primary btn-sm">
                         <i className="la la-search me-1"></i>Book Now
                       </Link>
                     </div>
