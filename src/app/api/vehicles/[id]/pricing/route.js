@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Vehicle } from '../../../../../models/Vehicle.js';
+import { query } from '../../../../../lib/db';
 
 export async function GET(request, { params }) {
   try {
@@ -37,26 +37,33 @@ export async function GET(request, { params }) {
       }, { status: 400 });
     }
 
-    // Get vehicle to ensure it exists
-    const vehicle = await Vehicle.findById(vehicleId);
-    if (!vehicle) {
+    // Get vehicle rate from agency_vehicles
+    const vehicles = await query(
+      'SELECT daily_rate FROM agency_vehicles WHERE vehicle_id = ?', 
+      [vehicleId]
+    );
+
+    if (!vehicles || vehicles.length === 0) {
       return NextResponse.json({
         error: 'Vehicle not found'
       }, { status: 404 });
     }
 
-    // Skip availability check for now (can be added later)
-    // TODO: Implement proper availability checking
+    const dailyRate = parseFloat(vehicles[0].daily_rate || 50);
 
-    // Calculate pricing
-    const pricing = await Vehicle.getPrice(vehicleId, startDate, endDate);
+    // Calculate number of days
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (!pricing) {
-      return NextResponse.json({
-        error: 'Unable to calculate pricing'
-      }, { status: 500 });
-    }
-
+    // Simple pricing calculation
+    const pricing = {
+      days: diffDays,
+      price_per_day: dailyRate,
+      base_total: dailyRate * diffDays,
+      is_holiday: false, // Defaulting to false as custom logic logic removed
+      is_high_season: false
+    };
+    
     return NextResponse.json(pricing);
 
   } catch (error) {
