@@ -484,6 +484,12 @@ function BookingConfirmationContent() {
                       <div className="col-md-8">
                         <h5 className="car-title">{booking.brand || booking.vehicle_make || 'N/A'} {booking.model || 'N/A'}</h5>
                         <p className="car-category text-muted mb-2">{booking.category}</p>
+                        <div className="agency-info mb-3">
+                          <span className="badge bg-light text-primary border border-primary">
+                            <i className="la la-building me-1"></i>
+                            {booking.agency_name || 'Premium Car Rental'}
+                          </span>
+                        </div>
                         <div className="car-features">
                           <div className="d-flex flex-wrap">
                             <div className="feature-item me-3 mb-2">
