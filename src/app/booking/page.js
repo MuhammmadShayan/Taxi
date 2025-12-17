@@ -1466,10 +1466,15 @@ function BookingContent() {
                       </div>
                       <div className="car-info">
                         <h5 className="car-title">{vehicle?.brand} {vehicle?.model}</h5>
-                        <p className="car-category text-muted">{vehicle?.category_name}</p>
+                        <p className="car-category text-muted mb-1">{vehicle?.category_name}</p>
+                        <div className="agency-info mb-1">
+                          <span className="badge bg-light text-primary border border-primary">
+                            <i className="la la-building me-1"></i>
+                            {vehicle?.agency_name}
+                          </span>
+                        </div>
                         <div className="car-rating">
                           <span className="badge bg-warning text-dark">{vehicle?.agency_rating || 4.0}/5</span>
-                          <small className="text-muted ms-1">({vehicle?.agency_name})</small>
                         </div>
                       </div>
                     </div>

@@ -25,6 +25,7 @@ export async function GET() {
       WHERE av.status = 'available'
         AND av.daily_rate IS NOT NULL
         AND av.daily_rate > 0
+        AND u.user_id IS NOT NULL
       GROUP BY av.vehicle_id, av.agency_id, u.first_name, u.last_name, u.email
       ORDER BY 
         total_bookings DESC,

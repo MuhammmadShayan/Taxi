@@ -535,7 +535,13 @@ alert(t('errors.required_fields'));
                                 </div>
                               </div>
                               <div className="card-body" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
-                                <p className="card-meta">{car.category}</p>
+                                <p className="card-meta mb-0">{car.category}</p>
+                                <div className="agency-badge mb-2">
+                                  <span className="badge bg-light text-dark border">
+                                    <i className="la la-building me-1"></i>
+                                    {car.agency_name}
+                                  </span>
+                                </div>
                                 <h3 className="card-title">
                                   <Link href={`/car-single/${car.id}`}>{car.name}</Link>
                                 </h3>

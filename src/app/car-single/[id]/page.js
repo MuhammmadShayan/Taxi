@@ -321,7 +321,7 @@ export default function CarSingle({ params }) {
                             </div>
                             <div className="single-feature-titles">
                               <h3 className="title font-size-15 font-weight-medium">Rental Company</h3>
-                              <span className="font-size-13">{car.agency_name || 'Premium Car Rental'}</span>
+                              <span className="font-size-15 font-weight-bold text-primary">{car.agency_name || 'Premium Car Rental'}</span>
                             </div>
                           </div>
                         </div>

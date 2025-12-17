@@ -27,7 +27,7 @@ export async function GET(request, { params }) {
           ELSE NULL
         END as badge
       FROM agency_vehicles av
-      LEFT JOIN users u ON av.agency_id = u.id
+      LEFT JOIN users u ON av.agency_id = u.user_id
       LEFT JOIN reservations r ON av.vehicle_id = r.vehicle_id 
       WHERE av.vehicle_id = ?
       GROUP BY av.vehicle_id, av.agency_id, u.first_name, u.last_name, u.email
