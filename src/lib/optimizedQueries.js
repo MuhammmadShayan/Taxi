@@ -1,37 +1,6 @@
 import { query } from './db.js';
 import { DatabaseError } from './errorHandler.js';
 
-/**
- * Get booking details with all related information
- */
-export async function getBookingWithDetails(bookingId) {
-  try {
-    const bookings = await query(`
-      SELECT 
-        r.*,
-        v.make as brand,
-        v.model,
-        v.year,
-        v.images,
-        u.first_name as customer_first_name,
-        u.last_name as customer_last_name,
-        u.email as customer_email,
-        u.phone as customer_phone,
-        u.address as customer_address,
-        u.city as customer_city,
-        u.country as customer_country,
-        pl.location_name as pickup_location_name,
-        pl.address as pickup_address,
-        dl.location_name as dropoff_location_name,
-        dl.address as dropoff_address,
-        a.business_name as agency_name
-      FROM reservations r
-      LEFT JOIN vehicles v ON r.vehicle_id = v.id
-      LEFT JOIN customers c ON r.customer_id = c.customer_id
-      LEFT JOIN users u ON c.user_id = u.user_id
-      LEFT JOIN pickup_locations pl ON r.pickup_location_id = pl.location_id
-      LEFT JOIN pickup_locations dl ON r.dropoff_location_id = dl.location_id
-      LEFT JOIN agencies a ON r.agency_id = a.agency_id
       WHERE r.reservation_id = ?
     `, [bookingId]);
 
