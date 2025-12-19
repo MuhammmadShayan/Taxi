@@ -81,7 +81,7 @@ export default function AdminDashboardLayout({ children, pageTitle, breadcrumbs 
       {/* eslint-disable-next-line react/no-unknown-property */}
       {typeof window !== 'undefined' && null}
       {/* User Canvas Menu */}
-      <div className={`user-canvas-container ${userMenuOpen ? 'user-canvas-container-open' : ''}`}>
+      <div className={`user-canvas-container ${userMenuOpen ? 'active' : ''}`}>
         <div className="side-menu-close" onClick={() => setUserMenuOpen(false)}>
           <i className="la la-times"></i>
         </div>
