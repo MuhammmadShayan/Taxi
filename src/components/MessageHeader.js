@@ -7,11 +7,25 @@ export default function MessageHeader({ onClick }) {
   
   return (
     <div className="notification-item me-3">
-      <div 
-        className="dropdown-toggle" 
-        role="button" 
-        onClick={onClick}
-        style={{ cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}
+      <button 
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onClick) onClick();
+        }}
+        style={{ 
+          cursor: 'pointer', 
+          position: 'relative', 
+          display: 'flex', 
+          alignItems: 'center',
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
+          outline: 'none',
+          zIndex: 10
+        }}
+        aria-label="Messages"
       >
         <i className="la la-envelope" style={{ fontSize: '28px', color: '#fff' }}></i>
         {unreadCount > 0 && (
@@ -28,13 +42,14 @@ export default function MessageHeader({ onClick }) {
               height: '18px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              pointerEvents: 'none'
             }}
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
-      </div>
+      </button>
     </div>
   );
 }
