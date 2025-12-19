@@ -795,9 +795,15 @@ alert(t('errors.required_fields'));
               {/* No Results */}
               {!loading && !error && renderList.length === 0 && mounted && (
                 <div className="text-center py-5">
-                  <i className="la la-car" style={{fontSize: '4rem', color: '#ccc'}}></i>
-                  <h3 className="mt-3">No vehicles found</h3>
-                  <p className="text-muted">Try adjusting your search criteria</p>
+                  <i className="la la-map-marker" style={{fontSize: '4rem', color: '#ccc'}}></i>
+                  <h3 className="mt-3">
+                    {pickup_location ? `No vehicles found in ${pickup_location}` : 'No vehicles found'}
+                  </h3>
+                  <p className="text-muted">
+                    {pickup_location 
+                      ? "We currently don't have any partner agencies in this location. Please try a different city or airport."
+                      : "Try adjusting your search criteria"}
+                  </p>
                 </div>
               )}
 
