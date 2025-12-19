@@ -24,7 +24,7 @@ export default function Home() {
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [vehiclesError, setVehiclesError] = useState(null);
-  
+
   // Fix hydration mismatch and signal to legacy scripts that React has hydrated
   useEffect(() => {
     setMounted(true);
@@ -36,7 +36,7 @@ export default function Home() {
       // window.ENABLE_JQUERY_CLIENT_LOGO = true; // Uncomment if you want jQuery OwlCarousel
     }
   }, []);
-  
+
   // Fetch trending vehicles from agency_vehicles table
   useEffect(() => {
     const fetchTrendingVehicles = async () => {
@@ -44,7 +44,7 @@ export default function Home() {
         setVehiclesLoading(true);
         const response = await fetch('/api/vehicles/trending');
         const data = await response.json();
-        
+
         if (data.success) {
           setAgencyVehicles(data.vehicles || []);
           setAgencies(data.agencies || []);
@@ -70,7 +70,7 @@ export default function Home() {
       fetchTrendingVehicles();
     }
   }, [mounted]);
-  
+
   // Filter vehicles by selected agency
   useEffect(() => {
     if (selectedAgency === 'all') {
@@ -80,17 +80,21 @@ export default function Home() {
       setFilteredVehicles(filtered);
     }
   }, [selectedAgency, agencyVehicles]);
-  
+
   // Handle agency tab selection
   const handleAgencySelect = (agencyId) => {
     setSelectedAgency(agencyId);
   };
-  
+
   // Removed carousel logic - using reliable grid layout for all vehicles
-  
+
   const [formData, setFormData] = useState({
     pickup_location: '',
+    pickup_latitude: null,
+    pickup_longitude: null,
     dropoff_location: '',
+    dropoff_latitude: null,
+    dropoff_longitude: null,
     pickup_date: '',
     pickup_time: '9:00AM',
     dropoff_date: '',
@@ -104,12 +108,16 @@ export default function Home() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (!formData.pickup_location || !formData.pickup_date || !formData.dropoff_date) {
-alert(t('errors.required_fields'));
+      alert(t('errors.required_fields'));
       return;
     }
     const params = new URLSearchParams({
       pickup_location: formData.pickup_location,
+      pickup_latitude: formData.pickup_latitude || '',
+      pickup_longitude: formData.pickup_longitude || '',
       dropoff_location: formData.dropoff_location || formData.pickup_location,
+      dropoff_latitude: formData.dropoff_latitude || '',
+      dropoff_longitude: formData.dropoff_longitude || '',
       start_date: formData.pickup_date,
       end_date: formData.dropoff_date,
       pickup_time: formData.pickup_time,
@@ -128,11 +136,33 @@ alert(t('errors.required_fields'));
 
   // Handle place selection from Google Places Autocomplete
   const handlePickupPlaceSelect = (place) => {
-    setFormData(prev => ({ ...prev, pickup_location: place.formatted_address || place.name }));
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      pickup_location: place.formatted_address || place.name,
+      pickup_latitude: lat,
+      pickup_longitude: lng
+    }));
   };
 
   const handleDropoffPlaceSelect = (place) => {
-    setFormData(prev => ({ ...prev, dropoff_location: place.formatted_address || place.name }));
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      dropoff_location: place.formatted_address || place.name,
+      dropoff_latitude: lat,
+      dropoff_longitude: lng
+    }));
   };
 
 
@@ -151,16 +181,17 @@ alert(t('errors.required_fields'));
       <link rel="stylesheet" href="/html-folder/css/flag-icon.min.css" />
       <link rel="stylesheet" href="/html-folder/css/style.css" />
       <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .search-fields-container .form-group .form-icon.la.la-calendar{color:#000!important;opacity:1!important}
         .search-fields-container input[type="date"]::-webkit-calendar-picker-indicator{opacity:1!important;filter:brightness(0)!important}
         .search-fields-container input[type="date"]{color:#0d233e}
       `}} />
-      
+
       <div>
         {/* Auth Debugger for testing */}
-        
-        
+
+
         {/* ================================
             START HEADER AREA
         ================================= */}
@@ -191,7 +222,7 @@ alert(t('errors.required_fields'));
                         <svg viewBox="-73 0 512 512.15596" xmlns="http://www.w3.org/2000/svg">
                           <path d="m1.78125 232.433594c-3.957031 10.554687-.867188 22.460937 7.730469 29.753906 16.289062 16.300781 49.789062 75.144531 66.371093 116.609375 11.316407 28.28125 36.164063 56.039063 55.015626 74.351563 8.113281 7.984374 12.667968 18.898437 12.644531 30.285156v3.121094c0 14.140624 11.460937 25.601562 25.601562 25.601562h136.53125c14.140625 0 25.601563-11.460938 25.601563-25.601562v-26.214844c-.078125-2.167969.746094-4.273438 2.277344-5.808594 31.496093-28.800781 31.855468-76.878906 31.855468-78.910156v-135.089844c.316406-18.273438-13.460937-33.722656-31.648437-35.488281-6.835938-.449219-13.648438 1.171875-19.550781 4.648437v-13.269531c.070312-12.296875-6.515626-23.667969-17.21875-29.726563-10.699219-6.058593-23.839844-5.855468-34.347657.535157-1.09375-11.511719-8.007812-21.660157-18.316406-26.890625-10.3125-5.230469-22.582031-4.820313-32.519531 1.09375v-14.132813c21.179687-12.019531 34.226562-34.527343 34.136718-58.878906 0-37.703125-30.566406-68.265625-68.269531-68.265625s-68.265625 30.5625-68.265625 68.265625c-.089844 24.351563 12.957032 46.859375 34.132813 58.878906v137.386719c.242187 10.074219-1.128907 20.117188-4.0625 29.757812-.914063 2.847657-3.246094 5.019532-6.152344 5.734376-2.734375.691406-5.632813-.070313-7.679687-2.015626-6.664063-6.355468-12.585938-13.449218-17.644532-21.144531-14.808594-22.152343-52.070312-63.53125-75.394531-63.53125-13.101563-.273437-25.152344 7.132813-30.828125 18.945313z" />
                         </svg>
-<span>{t('home.features.free_cancellations')}</span>
+                        <span>{t('home.features.free_cancellations')}</span>
                       </li>
                       <li className="d-flex align-items-center">
                         <svg viewBox="0 0 52 60" xmlns="http://www.w3.org/2000/svg">
@@ -199,7 +230,7 @@ alert(t('errors.required_fields'));
                             <path d="m7 35h14.354l1.454 3.994-.958 2.636c-.1846791.4673778-.550069.8405077-1.0134734 1.0349418-.4634045.1944342-.9856451.1937341-1.4485266-.0019418l-.036-.013h-.012c-4.148-1.5-8.9 1.068-10.59 5.723s.3 9.684 4.439 11.2c4.217 1.529 8.934-1.138 10.6-5.728l2.211-6.08 2.213 6.079c.7681989 2.1829185 2.3025125 4.0128664 4.318 5.15 1.902527 1.1176044 4.2045361 1.3279064 6.2780786.5735392 2.0735426-.7543671 3.7022803-2.3946983 4.4419214-4.4735392 1.6263512-4.4809857-.1945815-9.4831776-4.321-11.87-1.9215394-1.103671-4.2309581-1.3073357-6.316-.557-.5027979.190678-1.0605312.1752254-1.552-.043-.4254396-.193397-.7539361-.5514943-.91-.992l-.958-2.632 1.456-4h14.35c3.8641657-.0044086 6.9955914-3.1358343 7-7v-21c-.0044086-3.86416566-3.1358343-6.99559136-7-7h-38c-3.86416566.00440864-6.99559136 3.13583434-7 7v21c.00440864 3.8641657 3.13583434 6.9955914 7 7z" />
                           </g>
                         </svg>
-<span>{t('home.features.no_credit_card_fees')}</span>
+                        <span>{t('home.features.no_credit_card_fees')}</span>
                       </li>
                       <li className="d-flex align-items-center">
                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -269,10 +300,10 @@ alert(t('errors.required_fields'));
                               <label className="label-text">{t('common.time')}</label>
                               <div className="form-group select2-container-wrapper">
                                 <div className="select-contain select-contain-shadow w-auto">
-                                  <select 
-                                    className="select-contain-select" 
-                                    name="pickup_time" 
-                                    value={formData.pickup_time} 
+                                  <select
+                                    className="select-contain-select"
+                                    name="pickup_time"
+                                    value={formData.pickup_time}
                                     onChange={handleInputChange}
                                   >
                                     <option value="12:00AM">12:00 AM</option>
@@ -348,10 +379,10 @@ alert(t('errors.required_fields'));
                               <label className="label-text">{t('common.time')}</label>
                               <div className="form-group select2-container-wrapper">
                                 <div className="select-contain select-contain-shadow w-auto">
-                                  <select 
-                                    className="select-contain-select" 
-                                    name="dropoff_time" 
-                                    value={formData.dropoff_time} 
+                                  <select
+                                    className="select-contain-select"
+                                    name="dropoff_time"
+                                    value={formData.dropoff_time}
                                     onChange={handleInputChange}
                                   >
                                     <option value="12:00AM">12:00 AM</option>
@@ -444,9 +475,9 @@ alert(t('errors.required_fields'));
                 <div className="col-lg-12">
                   <div className="d-flex justify-content-end mb-4">
                     <div className="agency-tabs">
-                      <ul className="nav nav-pills" style={{gap: '0.5rem'}}>
+                      <ul className="nav nav-pills" style={{ gap: '0.5rem' }}>
                         <li className="nav-item">
-                          <button 
+                          <button
                             className={`nav-link ${selectedAgency === 'all' ? 'active' : ''}`}
                             onClick={() => handleAgencySelect('all')}
                             style={{
@@ -464,7 +495,7 @@ alert(t('errors.required_fields'));
                         </li>
                         {agencies.map((agency) => (
                           <li key={agency.id} className="nav-item">
-                            <button 
+                            <button
                               className={`nav-link ${selectedAgency == agency.id ? 'active' : ''}`}
                               onClick={() => handleAgencySelect(agency.id)}
                               style={{
@@ -487,7 +518,7 @@ alert(t('errors.required_fields'));
                 </div>
               </div>
             )}
-            
+
             <div className="row padding-top-20px">
               <div className="col-lg-12">
                 {/* Show loading state for vehicles */}
@@ -507,8 +538,8 @@ alert(t('errors.required_fields'));
                         {vehiclesError}
                       </div>
                     )}
-                    
-                    
+
+
                     {/* Display vehicles - use carousel if available, otherwise grid */}
                     {filteredVehicles.length > 0 ? (
                       <>
@@ -519,77 +550,77 @@ alert(t('errors.required_fields'));
                             {t('home.showing_vehicles_from')} <strong>{agencies.find(a => a.id == selectedAgency)?.name}</strong>
                           </div>
                         )}
-                        
+
                         {/* Use grid layout for reliable display */}
                         <div className="row">
                           {filteredVehicles.map((car) => (
-                          <div key={car.id} className="col-lg-4 col-md-6 mb-4">
-                            <div className="card-item car-card mb-0 border" style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
-                              <div className="card-img">
-                                <Link href={`/car-single/${car.id}`} className="d-block">
-                                  <img src={car.image} alt={car.name} />
-                                </Link>
-                                {car.badge && <span className="badge">{car.badge}</span>}
-                                <div className="add-to-wishlist icon-element" title={t('home.add_to_wishlist')}>
-                                  <i className="la la-heart-o"></i>
-                                </div>
-                              </div>
-                              <div className="card-body" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
-                                <p className="card-meta mb-0">{car.category}</p>
-                                <div className="agency-badge mb-2">
-                                  <span className="badge bg-light text-dark border">
-                                    <i className="la la-building me-1"></i>
-                                    {car.agency_name}
-                                  </span>
-                                </div>
-                                <h3 className="card-title">
-                                  <Link href={`/car-single/${car.id}`}>{car.name}</Link>
-                                </h3>
-                                <div className="card-rating">
-                                  <span className="badge bg-primary text-white">{car.rating}</span>
-                                  <span className="review__text">{t('search_results.rating.average')}</span>
-                                  <span className="rating__text">({car.reviews})</span>
-                                </div>
-                                <div className="card-attributes">
-                                  <ul className="d-flex align-items-center">
-                                    <li className="d-flex align-items-center" title="Passengers">
-                                      <i className="la la-users"></i><span>{car.passengers}</span>
-                                    </li>
-                                    <li className="d-flex align-items-center" title="Luggage">
-                                      <i className="la la-suitcase"></i><span>{car.luggage}</span>
-                                    </li>
-                                    {/* Additional vehicle features */}
-                                    {car.air_conditioning && (
-                                      <li className="d-flex align-items-center" title="Air Conditioning">
-                                        <i className="la la-snowflake-o"></i>
-                                      </li>
-                                    )}
-                                    {car.bluetooth && (
-                                      <li className="d-flex align-items-center" title="Bluetooth">
-                                        <i className="la la-bluetooth"></i>
-                                      </li>
-                                    )}
-                                  </ul>
-                                </div>
-                                <div className="card-price d-flex align-items-center justify-content-between" style={{marginTop: 'auto'}}>
-                                  <p>
-                                    <span className="price__from">{t('featured_cars.per_day')}</span>
-                                    <span className="price__num">{formatCurrency(convertAmount(car.price))}</span>
-                                    <span className="price__text">{t('featured_cars.per_day')}</span>
-                                  </p>
-                                  <Link href={`/car-single/${car.id}`} className="btn-text">
-                                    {t('common.view_details')}<i className="la la-angle-right"></i>
+                            <div key={car.id} className="col-lg-4 col-md-6 mb-4">
+                              <div className="card-item car-card mb-0 border" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <div className="card-img">
+                                  <Link href={`/car-single/${car.id}`} className="d-block">
+                                    <img src={car.image} alt={car.name} />
                                   </Link>
+                                  {car.badge && <span className="badge">{car.badge}</span>}
+                                  <div className="add-to-wishlist icon-element" title={t('home.add_to_wishlist')}>
+                                    <i className="la la-heart-o"></i>
+                                  </div>
+                                </div>
+                                <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                  <p className="card-meta mb-0">{car.category}</p>
+                                  <div className="agency-badge mb-2">
+                                    <span className="badge bg-light text-dark border">
+                                      <i className="la la-building me-1"></i>
+                                      {car.agency_name}
+                                    </span>
+                                  </div>
+                                  <h3 className="card-title">
+                                    <Link href={`/car-single/${car.id}`}>{car.name}</Link>
+                                  </h3>
+                                  <div className="card-rating">
+                                    <span className="badge bg-primary text-white">{car.rating}</span>
+                                    <span className="review__text">{t('search_results.rating.average')}</span>
+                                    <span className="rating__text">({car.reviews})</span>
+                                  </div>
+                                  <div className="card-attributes">
+                                    <ul className="d-flex align-items-center">
+                                      <li className="d-flex align-items-center" title="Passengers">
+                                        <i className="la la-users"></i><span>{car.passengers}</span>
+                                      </li>
+                                      <li className="d-flex align-items-center" title="Luggage">
+                                        <i className="la la-suitcase"></i><span>{car.luggage}</span>
+                                      </li>
+                                      {/* Additional vehicle features */}
+                                      {car.air_conditioning && (
+                                        <li className="d-flex align-items-center" title="Air Conditioning">
+                                          <i className="la la-snowflake-o"></i>
+                                        </li>
+                                      )}
+                                      {car.bluetooth && (
+                                        <li className="d-flex align-items-center" title="Bluetooth">
+                                          <i className="la la-bluetooth"></i>
+                                        </li>
+                                      )}
+                                    </ul>
+                                  </div>
+                                  <div className="card-price d-flex align-items-center justify-content-between" style={{ marginTop: 'auto' }}>
+                                    <p>
+                                      <span className="price__from">{t('featured_cars.per_day')}</span>
+                                      <span className="price__num">{formatCurrency(convertAmount(car.price))}</span>
+                                      <span className="price__text">{t('featured_cars.per_day')}</span>
+                                    </p>
+                                    <Link href={`/car-single/${car.id}`} className="btn-text">
+                                      {t('common.view_details')}<i className="la la-angle-right"></i>
+                                    </Link>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
                         </div>
                       </>
                     ) : (
                       <div className="text-center py-5">
-                        <i className="la la-car text-muted" style={{fontSize: '4rem'}}></i>
+                        <i className="la la-car text-muted" style={{ fontSize: '4rem' }}></i>
                         <h4 className="text-muted mt-3">{t('home.no_vehicles')}</h4>
                         <p className="text-muted">{t('home.check_back_later')}</p>
                       </div>

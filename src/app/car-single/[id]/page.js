@@ -14,11 +14,15 @@ export default function CarSingle({ params }) {
   const [relatedCars, setRelatedCars] = useState([]);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('description');
-  
+
   // Booking form state
   const [formData, setFormData] = useState({
     pickup_location: '',
+    pickup_latitude: null,
+    pickup_longitude: null,
     dropoff_location: '',
+    dropoff_latitude: null,
+    dropoff_longitude: null,
     pickup_date: '',
     pickup_time: '9:00AM',
     dropoff_date: '',
@@ -40,7 +44,7 @@ export default function CarSingle({ params }) {
           } else {
             setError('Car not found');
           }
-          
+
           // Get 3 random cars excluding current one for related section
           const filtered = data.vehicles.filter(v => v.id != params.id);
           const shuffled = filtered.sort(() => 0.5 - Math.random());
@@ -62,50 +66,74 @@ export default function CarSingle({ params }) {
       const parsed = JSON.parse(images);
       if (Array.isArray(parsed)) return parsed[0] || '/html-folder/images/car-img.png';
       if (typeof parsed === 'string' && parsed) return parsed;
-    } catch (_) {}
+    } catch (_) { }
     return '/html-folder/images/car-img.png';
   }
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handlePickupPlaceSelect = (place) => {
-    setFormData(prev => ({ ...prev, pickup_location: place.formatted_address || place.name }));
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+    setFormData(prev => ({
+      ...prev,
+      pickup_location: place.formatted_address || place.name,
+      pickup_latitude: lat,
+      pickup_longitude: lng
+    }));
   };
 
   const handleDropoffPlaceSelect = (place) => {
-    setFormData(prev => ({ ...prev, dropoff_location: place.formatted_address || place.name }));
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+    setFormData(prev => ({
+      ...prev,
+      dropoff_location: place.formatted_address || place.name,
+      dropoff_latitude: lat,
+      dropoff_longitude: lng
+    }));
   };
-  
+
   const handlePassengerChange = (increment) => {
     setFormData(prev => ({
       ...prev,
       passengers: Math.max(1, Math.min(8, prev.passengers + increment))
     }));
   };
-  
+
   const handleBookNow = (e) => {
     e.preventDefault();
     console.log('Book Now clicked with data:', formData);
-    
+
     if (!formData.pickup_location || !formData.pickup_date || !formData.dropoff_date) {
       alert('Please fill all required fields');
       return;
     }
-    
+
     const urlParams = new URLSearchParams({
       vehicle_id: params.id,
       pickup_location: formData.pickup_location,
+      pickup_latitude: formData.pickup_latitude || '',
+      pickup_longitude: formData.pickup_longitude || '',
       dropoff_location: formData.dropoff_location || formData.pickup_location,
+      dropoff_latitude: formData.dropoff_latitude || '',
+      dropoff_longitude: formData.dropoff_longitude || '',
       pickup_date: formData.pickup_date,
       pickup_time: formData.pickup_time,
       dropoff_date: formData.dropoff_date,
       dropoff_time: formData.dropoff_time,
       passengers: formData.passengers
     });
-    
+
     console.log('Navigating to:', `/booking?${urlParams.toString()}`);
     router.push(`/booking?${urlParams.toString()}`);
   };
@@ -125,7 +153,7 @@ export default function CarSingle({ params }) {
         <link rel="stylesheet" href="/html-folder/css/jquery-ui.css" />
         <link rel="stylesheet" href="/html-folder/css/flag-icon.min.css" />
         <link rel="stylesheet" href="/html-folder/css/style.css" />
-        
+
         <Header />
         <main>
           <div className="container mt-5 pt-5">
@@ -156,7 +184,7 @@ export default function CarSingle({ params }) {
         <link rel="stylesheet" href="/html-folder/css/jquery-ui.css" />
         <link rel="stylesheet" href="/html-folder/css/flag-icon.min.css" />
         <link rel="stylesheet" href="/html-folder/css/style.css" />
-        
+
         <Header />
         <main>
           <div className="container mt-5 pt-5">
@@ -188,14 +216,15 @@ export default function CarSingle({ params }) {
       <link rel="stylesheet" href="/html-folder/css/flag-icon.min.css" />
       <link rel="stylesheet" href="/html-folder/css/style.css" />
       <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet" />
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .sidebar-widget .form-group .form-icon.la.la-calendar { color: #000 !important; opacity: 1 !important; z-index: 9; }
         .sidebar-widget input[type="date"]::-webkit-calendar-picker-indicator { opacity: 1 !important; filter: brightness(0) !important; z-index: 10; cursor: pointer; }
         .sidebar-widget input[type="date"] { color: #0d233e; position: relative; }
       `}} />
-      
+
       <Header />
-      
+
       {/* Breadcrumb Top Bar */}
       <section className="breadcrumb-top-bar">
         <div className="container">
@@ -212,7 +241,7 @@ export default function CarSingle({ params }) {
           </div>
         </div>
       </section>
-      
+
       {/* Hero Section with Background */}
       <section className="breadcrumb-area bread-bg-8 py-0">
         <div className="breadcrumb-wrap">
@@ -242,7 +271,7 @@ export default function CarSingle({ params }) {
           </div>
         </div>
       </section>
-      
+
       {/* Car Detail Area */}
       <section className="car-detail-area padding-bottom-90px">
         {/* Navigation Tabs */}
@@ -285,7 +314,7 @@ export default function CarSingle({ params }) {
             </div>
           </div>
         </div>
-        
+
         {/* Main Content */}
         <div className="single-content-box">
           <div className="container">
@@ -308,9 +337,9 @@ export default function CarSingle({ params }) {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="section-block"></div>
-                    
+
                     {/* Car Features Grid */}
                     <div className="single-content-item py-4">
                       <div className="row">
@@ -325,7 +354,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="col-lg-4 responsive-column">
                           <div className="single-tour-feature d-flex align-items-center mb-3">
                             <div className="single-feature-icon icon-element ms-0 flex-shrink-0 me-3">
@@ -337,7 +366,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="col-lg-4 responsive-column">
                           <div className="single-tour-feature d-flex align-items-center mb-3">
                             <div className="single-feature-icon icon-element ms-0 flex-shrink-0 me-3">
@@ -349,7 +378,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="col-lg-4 responsive-column">
                           <div className="single-tour-feature d-flex align-items-center mb-3">
                             <div className="single-feature-icon icon-element ms-0 flex-shrink-0 me-3">
@@ -361,7 +390,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="col-lg-4 responsive-column">
                           <div className="single-tour-feature d-flex align-items-center mb-3">
                             <div className="single-feature-icon icon-element ms-0 flex-shrink-0 me-3">
@@ -373,7 +402,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="col-lg-4 responsive-column">
                           <div className="single-tour-feature d-flex align-items-center mb-3">
                             <div className="single-feature-icon icon-element ms-0 flex-shrink-0 me-3">
@@ -389,9 +418,9 @@ export default function CarSingle({ params }) {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="section-block"></div>
-                    
+
                     {/* Car Description */}
                     <div className="single-content-item padding-top-40px padding-bottom-40px">
                       <h3 className="title font-size-20">Car Rental Information</h3>
@@ -402,10 +431,10 @@ export default function CarSingle({ params }) {
                         This vehicle comes fully equipped with modern amenities and is maintained to the highest standards. Whether you're traveling for business or leisure, this car provides the reliability and comfort you need for your journey.
                       </p>
                     </div>
-                    
+
                     <div className="section-block"></div>
                   </div>
-                  
+
                   {/* FAQ Section */}
                   <div id="faq" className="page-scroll">
                     <div className="single-content-item padding-top-40px padding-bottom-40px">
@@ -441,7 +470,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="card">
                           <div className="card-header" id="faqHeadingFive">
                             <h2 className="mb-0">
@@ -472,7 +501,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="card">
                           <div className="card-header" id="faqHeadingSix">
                             <h2 className="mb-0">
@@ -503,7 +532,7 @@ export default function CarSingle({ params }) {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="card">
                           <div className="card-header" id="faqHeadingSeven">
                             <h2 className="mb-0">
@@ -536,10 +565,10 @@ export default function CarSingle({ params }) {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="section-block"></div>
                   </div>
-                  
+
                   {/* Reviews Section */}
                   <div id="reviews" className="page-scroll">
                     <div className="single-content-item padding-top-40px padding-bottom-40px">
@@ -553,7 +582,7 @@ export default function CarSingle({ params }) {
                               <span>Based on {car.reviews || '150'} reviews</span>
                             </div>
                           </div>
-                          
+
                           <div className="col-lg-8">
                             <div className="review-bars">
                               <div className="row">
@@ -570,7 +599,7 @@ export default function CarSingle({ params }) {
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <div className="col-lg-6">
                                   <div className="progress-item">
                                     <h3 className="progressbar-title">Value for Money</h3>
@@ -584,7 +613,7 @@ export default function CarSingle({ params }) {
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <div className="col-lg-6">
                                   <div className="progress-item">
                                     <h3 className="progressbar-title">Cleanliness</h3>
@@ -598,7 +627,7 @@ export default function CarSingle({ params }) {
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <div className="col-lg-6">
                                   <div className="progress-item">
                                     <h3 className="progressbar-title">Facilities</h3>
@@ -618,12 +647,12 @@ export default function CarSingle({ params }) {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="section-block"></div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Sidebar with Booking Form */}
               <div className="col-lg-4">
                 <div className="sidebar single-content-sidebar mb-0">
@@ -641,7 +670,7 @@ export default function CarSingle({ params }) {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="sidebar-widget-item">
                       <div className="contact-form-action">
                         <form onSubmit={handleBookNow}>
@@ -649,31 +678,31 @@ export default function CarSingle({ params }) {
                             <label className="label-text">Pick-up From</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                                <LocationAutocomplete
-                                  placeholder="Destination, city, or airport"
-                                  onPlaceSelect={handlePickupPlaceSelect}
-                                  value={formData.pickup_location}
-                                  onChange={(value) => setFormData(prev => ({ ...prev, pickup_location: value }))}
-                                  className="form-control"
-                                  required
-                                />
+                              <LocationAutocomplete
+                                placeholder="Destination, city, or airport"
+                                onPlaceSelect={handlePickupPlaceSelect}
+                                value={formData.pickup_location}
+                                onChange={(value) => setFormData(prev => ({ ...prev, pickup_location: value }))}
+                                className="form-control"
+                                required
+                              />
                             </div>
                           </div>
-                          
+
                           <div className="input-box">
                             <label className="label-text">Drop-off to</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                                <LocationAutocomplete
-                                  placeholder="Different location (optional)"
-                                  onPlaceSelect={handleDropoffPlaceSelect}
-                                  value={formData.dropoff_location}
-                                  onChange={(value) => setFormData(prev => ({ ...prev, dropoff_location: value }))}
-                                  className="form-control"
-                                />
+                              <LocationAutocomplete
+                                placeholder="Different location (optional)"
+                                onPlaceSelect={handleDropoffPlaceSelect}
+                                value={formData.dropoff_location}
+                                onChange={(value) => setFormData(prev => ({ ...prev, dropoff_location: value }))}
+                                className="form-control"
+                              />
                             </div>
                           </div>
-                          
+
                           <div className="input-box">
                             <label className="label-text">Pick-up Date</label>
                             <div className="form-group">
@@ -688,12 +717,12 @@ export default function CarSingle({ params }) {
                               />
                             </div>
                           </div>
-                          
+
                           <div className="input-box">
                             <label className="label-text">Pick-up Time</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select"
                                   name="pickup_time"
                                   value={formData.pickup_time}
@@ -713,7 +742,7 @@ export default function CarSingle({ params }) {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="input-box">
                             <label className="label-text">Drop-off Date</label>
                             <div className="form-group">
@@ -728,12 +757,12 @@ export default function CarSingle({ params }) {
                               />
                             </div>
                           </div>
-                          
+
                           <div className="input-box">
                             <label className="label-text">Drop-off Time</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select"
                                   name="dropoff_time"
                                   value={formData.dropoff_time}
@@ -753,7 +782,7 @@ export default function CarSingle({ params }) {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="btn-box pt-2">
                             <button
                               type="submit"
@@ -765,7 +794,7 @@ export default function CarSingle({ params }) {
                         </form>
                       </div>
                     </div>
-                    
+
                     <div className="btn-box pt-2">
                       <a
                         href="#"
@@ -789,7 +818,7 @@ export default function CarSingle({ params }) {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Enquiry Form Widget */}
                   <div className="sidebar-widget single-content-widget">
                     <h3 className="title stroke-shape">Enquiry Form</h3>
@@ -810,7 +839,7 @@ export default function CarSingle({ params }) {
                                   />
                                 </div>
                               </div>
-                              
+
                               <div className="input-box">
                                 <label className="label-text">Your Email</label>
                                 <div className="form-group">
@@ -823,7 +852,7 @@ export default function CarSingle({ params }) {
                                   />
                                 </div>
                               </div>
-                              
+
                               <div className="input-box">
                                 <label className="label-text">Message</label>
                                 <div className="form-group">
@@ -836,7 +865,7 @@ export default function CarSingle({ params }) {
                                   ></textarea>
                                 </div>
                               </div>
-                              
+
                               <div className="input-box">
                                 <div className="form-group">
                                   <div className="custom-checkbox mb-0">
@@ -851,7 +880,7 @@ export default function CarSingle({ params }) {
                                   </div>
                                 </div>
                               </div>
-                              
+
                               <div className="btn-box">
                                 <button type="button" className="theme-btn">
                                   Submit Enquiry
@@ -863,7 +892,7 @@ export default function CarSingle({ params }) {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Why Book With Us Widget */}
                   <div className="sidebar-widget single-content-widget">
                     <h3 className="title stroke-shape">Why Book With Us?</h3>
@@ -884,7 +913,7 @@ export default function CarSingle({ params }) {
                       </ul>
                     </div>
                   </div>
-                  
+
                   {/* Contact Information Widget */}
                   <div className="sidebar-widget single-content-widget">
                     <h3 className="title stroke-shape">Get a Question?</h3>
@@ -904,7 +933,7 @@ export default function CarSingle({ params }) {
                       </ul>
                     </div>
                   </div>
-                  
+
                   {/* Agency Information Widget */}
                   <div className="sidebar-widget single-content-widget">
                     <h3 className="title stroke-shape">Organized by</h3>
@@ -947,7 +976,7 @@ export default function CarSingle({ params }) {
           </div>
         </div>
       </section>
-      
+
       {/* Related Cars Section */}
       {relatedCars.length > 0 && (
         <>
@@ -961,7 +990,7 @@ export default function CarSingle({ params }) {
                   </div>
                 </div>
               </div>
-              
+
               <div className="row padding-top-50px">
                 {relatedCars.map((relatedCar) => (
                   <div key={relatedCar.id} className="col-lg-4 responsive-column">
@@ -975,7 +1004,7 @@ export default function CarSingle({ params }) {
                           <i className="la la-heart-o"></i>
                         </div>
                       </div>
-                      
+
                       <div className="card-body">
                         <p className="card-meta">{relatedCar.category}</p>
                         <h3 className="card-title">
@@ -983,13 +1012,13 @@ export default function CarSingle({ params }) {
                             {relatedCar.brand} {relatedCar.model} or Similar
                           </Link>
                         </h3>
-                        
+
                         <div className="card-rating">
                           <span className="badge bg-primary text-white">{relatedCar.rating}/5</span>
                           <span className="review__text">Average</span>
                           <span className="rating__text">({relatedCar.reviews} Reviews)</span>
                         </div>
-                        
+
                         <div className="card-attributes">
                           <ul className="d-flex align-items-center">
                             <li className="d-flex align-items-center" title="Passengers">
@@ -1000,7 +1029,7 @@ export default function CarSingle({ params }) {
                             </li>
                           </ul>
                         </div>
-                        
+
                         <div className="card-price d-flex align-items-center justify-content-between">
                           <p>
                             <span className="price__from">From</span>
@@ -1020,7 +1049,7 @@ export default function CarSingle({ params }) {
           </section>
         </>
       )}
-      
+
       <Footer />
     </>
   );

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import Breadcrumb from '../../../components/Breadcrumb';
+import LocationAutocomplete from '../../../components/LocationAutocomplete';
 import { useI18n } from '../../../i18n/I18nProvider';
 
 export default function CarDetail() {
@@ -20,17 +21,21 @@ export default function CarDetail() {
   const [reviews, setReviews] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [mainImage, setMainImage] = useState('');
-  
+
   const [bookingData, setBookingData] = useState({
     pickup_location: '',
+    pickup_latitude: null,
+    pickup_longitude: null,
     dropoff_location: '',
+    dropoff_latitude: null,
+    dropoff_longitude: null,
     pickup_date: '',
     pickup_time: '09:00',
     dropoff_date: '',
     dropoff_time: '09:00',
     passengers: 1
   });
-  
+
   const [isHydrated, setIsHydrated] = useState(false);
 
   const [enquiryData, setEnquiryData] = useState({
@@ -67,7 +72,11 @@ export default function CarDetail() {
     if (searchParams) {
       const newBookingData = {
         pickup_location: searchParams.get('pickup_location') || '',
+        pickup_latitude: searchParams.get('pickup_latitude') || null,
+        pickup_longitude: searchParams.get('pickup_longitude') || null,
         dropoff_location: searchParams.get('dropoff_location') || searchParams.get('pickup_location') || '',
+        dropoff_latitude: searchParams.get('dropoff_latitude') || null,
+        dropoff_longitude: searchParams.get('dropoff_longitude') || null,
         pickup_date: searchParams.get('pickup_date') || '',
         pickup_time: searchParams.get('pickup_time') || '09:00',
         dropoff_date: searchParams.get('dropoff_date') || '',
@@ -91,12 +100,12 @@ export default function CarDetail() {
       if (response.ok) {
         const carData = await response.json();
         setCar(carData.car);
-        
+
         // Parse images
         let images = [];
         if (carData.car.images) {
           try {
-            images = typeof carData.car.images === 'string' ? 
+            images = typeof carData.car.images === 'string' ?
               JSON.parse(carData.car.images) : carData.car.images;
           } catch (e) {
             images = [carData.car.images];
@@ -166,24 +175,58 @@ export default function CarDetail() {
     const days = calculateRentalDays();
     // Base price per day
     const basePrice = car.price_per_day * days;
-    
+
     // Additional cost per passenger (20% of daily rate per additional passenger)
     const passengerCost = car.price_per_day * 0.2 * (bookingData.passengers - 1) * days;
-    
+
     return basePrice + passengerCost;
+  };
+
+  const handlePickupPlaceSelect = (place) => {
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    setBookingData(prev => ({
+      ...prev,
+      pickup_location: place.formatted_address || place.name,
+      pickup_latitude: lat,
+      pickup_longitude: lng
+    }));
+  };
+
+  const handleDropoffPlaceSelect = (place) => {
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    setBookingData(prev => ({
+      ...prev,
+      dropoff_location: place.formatted_address || place.name,
+      dropoff_latitude: lat,
+      dropoff_longitude: lng
+    }));
   };
 
   const handleBookNow = () => {
     const queryParams = new URLSearchParams({
       pickup_location: bookingData.pickup_location,
+      pickup_latitude: bookingData.pickup_latitude || '',
+      pickup_longitude: bookingData.pickup_longitude || '',
       dropoff_location: bookingData.dropoff_location,
+      dropoff_latitude: bookingData.dropoff_latitude || '',
+      dropoff_longitude: bookingData.dropoff_longitude || '',
       pickup_date: bookingData.pickup_date,
       pickup_time: bookingData.pickup_time,
       dropoff_date: bookingData.dropoff_date,
       dropoff_time: bookingData.dropoff_time,
       passengers: bookingData.passengers.toString()
     });
-    
+
     router.push(`/cars/${id}/booking?${queryParams.toString()}`);
   };
 
@@ -246,7 +289,7 @@ export default function CarDetail() {
   const renderStars = (rating) => {
     const stars = [];
     const numRating = parseFloat(rating) || 0;
-    
+
     for (let i = 1; i <= 5; i++) {
       if (i <= numRating) {
         stars.push(<i key={i} className="la la-star"></i>);
@@ -318,7 +361,7 @@ export default function CarDetail() {
   let features = [];
   if (car.features) {
     try {
-      features = typeof car.features === 'string' ? 
+      features = typeof car.features === 'string' ?
         (car.features.startsWith('[') ? JSON.parse(car.features) : car.features.split(',')) :
         car.features;
     } catch (e) {
@@ -329,9 +372,9 @@ export default function CarDetail() {
   return (
     <>
       <Header />
-      
-      <Breadcrumb 
-        title={`${car.make} ${car.model} or Similar`} 
+
+      <Breadcrumb
+        title={`${car.make} ${car.model} or Similar`}
         breadcrumbItems={[
           { label: 'Car', href: '/cars' },
           { label: `${car.make} ${car.model}` }
@@ -389,7 +432,7 @@ export default function CarDetail() {
                     </div>
 
                     <div className="section-block"></div>
-                    
+
                     <div className="single-content-item py-4">
                       <div className="row">
                         <div className="col-lg-6 responsive-column">
@@ -401,8 +444,8 @@ export default function CarDetail() {
                           <div className="single-feature-titles my-3">
                             <h3 className="title font-size-15 font-weight-medium">Pick-up Time</h3>
                             <span className="font-size-13">
-                              {bookingData.pickup_date && bookingData.pickup_time 
-                                ? `${bookingData.pickup_date}, ${bookingData.pickup_time}` 
+                              {bookingData.pickup_date && bookingData.pickup_time
+                                ? `${bookingData.pickup_date}, ${bookingData.pickup_time}`
                                 : 'To be selected'}
                             </span>
                           </div>
@@ -421,8 +464,8 @@ export default function CarDetail() {
                           <div className="single-feature-titles my-3">
                             <h3 className="title font-size-15 font-weight-medium">Drop-off Time</h3>
                             <span className="font-size-13">
-                              {bookingData.dropoff_date && bookingData.dropoff_time 
-                                ? `${bookingData.dropoff_date}, ${bookingData.dropoff_time}` 
+                              {bookingData.dropoff_date && bookingData.dropoff_time
+                                ? `${bookingData.dropoff_date}, ${bookingData.dropoff_time}`
                                 : 'To be selected'}
                             </span>
                           </div>
@@ -513,15 +556,15 @@ export default function CarDetail() {
                     </div>
 
                     <div className="section-block"></div>
-                    
+
                     <div className="single-content-item padding-top-40px padding-bottom-40px">
                       <h3 className="title font-size-20">Car Rental Information</h3>
                       <p className="py-3">
-                        {car.description || 
+                        {car.description ||
                           `Experience comfort and reliability with our ${car.make} ${car.model}. This ${car.category} vehicle is perfect for your travel needs, featuring ${car.transmission} transmission and ${car.fuel_type} engine for optimal performance.`
                         }
                       </p>
-                      
+
                       {features.length > 0 && (
                         <div className="car-features mt-4">
                           <h4 className="font-size-18 mb-3">Features Include:</h4>
@@ -572,7 +615,7 @@ export default function CarDetail() {
                           >
                             <div className="card-body d-flex">
                               <p>
-                                To hire a car, you'll need a valid driver's license, a credit card for the security deposit, 
+                                To hire a car, you'll need a valid driver's license, a credit card for the security deposit,
                                 and proof of identity (passport or national ID). The minimum age requirement is typically 21 years old.
                               </p>
                             </div>
@@ -604,7 +647,7 @@ export default function CarDetail() {
                           >
                             <div className="card-body d-flex">
                               <p>
-                                The minimum age to rent a car is 21 years old. However, drivers under 25 may be subject 
+                                The minimum age to rent a car is 21 years old. However, drivers under 25 may be subject
                                 to a young driver surcharge. Some luxury or specialty vehicles may have higher age requirements.
                               </p>
                             </div>
@@ -636,7 +679,7 @@ export default function CarDetail() {
                           >
                             <div className="card-body d-flex">
                               <p>
-                                Yes, you can make a reservation for someone else, but the primary driver must be present 
+                                Yes, you can make a reservation for someone else, but the primary driver must be present
                                 at pickup with their valid driver's license and credit card. The booking must match their details.
                               </p>
                             </div>
@@ -668,7 +711,7 @@ export default function CarDetail() {
                           >
                             <div className="card-body d-flex">
                               <p>
-                                The rental price includes basic insurance coverage, unlimited mileage (for most rentals), 
+                                The rental price includes basic insurance coverage, unlimited mileage (for most rentals),
                                 and 24/7 roadside assistance. Additional insurance, GPS, and other extras can be added for an extra fee.
                               </p>
                             </div>
@@ -689,9 +732,9 @@ export default function CarDetail() {
                             <div className="review-summary">
                               <h2>{car.rating || 4.5}<span>/5</span></h2>
                               <p>
-                                {car.rating >= 4.5 ? 'Excellent' : 
-                                 car.rating >= 4 ? 'Very Good' : 
-                                 car.rating >= 3 ? 'Good' : 'Average'}
+                                {car.rating >= 4.5 ? 'Excellent' :
+                                  car.rating >= 4 ? 'Very Good' :
+                                    car.rating >= 3 ? 'Good' : 'Average'}
                               </p>
                               <span>Based on {reviews.length} reviews</span>
                             </div>
@@ -759,7 +802,7 @@ export default function CarDetail() {
                     </div>
 
                     <div className="section-block"></div>
-                    
+
                     {/* Review List */}
                     <div className="single-content-item padding-top-40px">
                       <h3 className="title font-size-20">
@@ -936,12 +979,12 @@ export default function CarDetail() {
                             <label className="label-text">Pick-up From</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                              <input
+                              <LocationAutocomplete
                                 className="form-control"
-                                type="text"
-                                value={bookingData.pickup_location}
-                                onChange={(e) => handleBookingChange('pickup_location', e.target.value)}
                                 placeholder="Destination, city, or airport"
+                                value={bookingData.pickup_location}
+                                onChange={(value) => handleBookingChange('pickup_location', value)}
+                                onPlaceSelect={handlePickupPlaceSelect}
                                 required
                               />
                             </div>
@@ -950,12 +993,12 @@ export default function CarDetail() {
                             <label className="label-text">Drop-off to</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                              <input
+                              <LocationAutocomplete
                                 className="form-control"
-                                type="text"
-                                value={bookingData.dropoff_location}
-                                onChange={(e) => handleBookingChange('dropoff_location', e.target.value)}
                                 placeholder="Destination, city, or airport"
+                                value={bookingData.dropoff_location}
+                                onChange={(value) => handleBookingChange('dropoff_location', value)}
+                                onPlaceSelect={handleDropoffPlaceSelect}
                                 required
                               />
                             </div>
@@ -978,7 +1021,7 @@ export default function CarDetail() {
                             <label className="label-text">Pick-up Time</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select"
                                   value={bookingData.pickup_time}
                                   onChange={(e) => handleBookingChange('pickup_time', e.target.value)}
@@ -1009,7 +1052,7 @@ export default function CarDetail() {
                             <label className="label-text">Drop-off Time</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select"
                                   value={bookingData.dropoff_time}
                                   onChange={(e) => handleBookingChange('dropoff_time', e.target.value)}
@@ -1027,18 +1070,18 @@ export default function CarDetail() {
                               <div className="qty-box mb-2 d-flex align-items-center justify-content-between">
                                 <label className="font-size-16 color-text-2">Passengers</label>
                                 <div className="qtyBtn d-flex align-items-center">
-                                  <div 
+                                  <div
                                     className="qtyDec"
                                     onClick={() => handleBookingChange('passengers', Math.max(1, bookingData.passengers - 1))}
                                   >
                                     <i className="la la-minus"></i>
                                   </div>
-                                  <input 
-                                    type="text" 
-                                    value={bookingData.passengers} 
+                                  <input
+                                    type="text"
+                                    value={bookingData.passengers}
                                     readOnly
                                   />
-                                  <div 
+                                  <div
                                     className="qtyInc"
                                     onClick={() => handleBookingChange('passengers', Math.min(car.seats, bookingData.passengers + 1))}
                                   >
@@ -1252,7 +1295,7 @@ export default function CarDetail() {
                 let relatedImages = [];
                 if (relatedCar.images) {
                   try {
-                    relatedImages = typeof relatedCar.images === 'string' ? 
+                    relatedImages = typeof relatedCar.images === 'string' ?
                       JSON.parse(relatedCar.images) : relatedCar.images;
                   } catch (e) {
                     relatedImages = [relatedCar.images];
@@ -1264,9 +1307,9 @@ export default function CarDetail() {
                     <div className="card-item car-card">
                       <div className="card-img">
                         <Link href={`/cars/${relatedCar.id}`} className="d-block">
-                          <img 
-                            src={relatedImages[0] || '/html-folder/images/car-img.png'} 
-                            alt={`${relatedCar.make} ${relatedCar.model}`} 
+                          <img
+                            src={relatedImages[0] || '/html-folder/images/car-img.png'}
+                            alt={`${relatedCar.make} ${relatedCar.model}`}
                           />
                         </Link>
                         {relatedCar.rating >= 4.5 && <span className="badge">Bestseller</span>}
@@ -1289,9 +1332,9 @@ export default function CarDetail() {
                         <div className="card-rating">
                           <span className="badge text-white">{relatedCar.rating || 4.0}/5</span>
                           <span className="review__text">
-                            {relatedCar.rating >= 4.5 ? 'Excellent' : 
-                             relatedCar.rating >= 4 ? 'Very Good' : 
-                             relatedCar.rating >= 3 ? 'Good' : 'Average'}
+                            {relatedCar.rating >= 4.5 ? 'Excellent' :
+                              relatedCar.rating >= 4 ? 'Very Good' :
+                                relatedCar.rating >= 3 ? 'Good' : 'Average'}
                           </span>
                           <span className="rating__text">({relatedCar.total_bookings || 0} Reviews)</span>
                         </div>

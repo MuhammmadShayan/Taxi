@@ -8,6 +8,7 @@ import Head from 'next/head';
 import Header from '../../components/Header';
 import LoginModal from '../../components/LoginModal';
 import SignupModal from '../../components/SignupModal';
+import LocationAutocomplete from '../../components/LocationAutocomplete';
 import { I18nProvider } from '../../i18n/I18nProvider';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -26,7 +27,11 @@ function BookingContent() {
 
   const [bookingData, setBookingData] = useState({
     pickup_location: searchParams.get('pickup_location') || '',
+    pickup_latitude: searchParams.get('pickup_latitude') || null,
+    pickup_longitude: searchParams.get('pickup_longitude') || null,
     dropoff_location: searchParams.get('dropoff_location') || searchParams.get('pickup_location') || '',
+    dropoff_latitude: searchParams.get('dropoff_latitude') || null,
+    dropoff_longitude: searchParams.get('dropoff_longitude') || null,
     pickup_date: searchParams.get('pickup_date') || '',
     pickup_time: searchParams.get('pickup_time') || '9:00AM',
     dropoff_date: searchParams.get('dropoff_date') || '',
@@ -161,7 +166,7 @@ function BookingContent() {
     setMounted(true);
     // Restore any saved booking data first
     restoreBookingDataFromSession();
-    
+
     if (vehicleId) {
       fetchVehicleDetails();
       fetchUserData();
@@ -263,20 +268,50 @@ function BookingContent() {
     setBookingData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handlePickupPlaceSelect = (place) => {
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    setBookingData(prev => ({
+      ...prev,
+      pickup_location: place.formatted_address || place.name,
+      pickup_latitude: lat,
+      pickup_longitude: lng
+    }));
+  };
+
+  const handleDropoffPlaceSelect = (place) => {
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+      lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+      lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    setBookingData(prev => ({
+      ...prev,
+      dropoff_location: place.formatted_address || place.name,
+      dropoff_latitude: lat,
+      dropoff_longitude: lng
+    }));
+  };
+
   // Check if user exists by email
   const checkUserExists = async (email) => {
     if (!email || !email.includes('@')) return;
-    
+
     try {
       setCheckingUser(true);
       const response = await fetch(`/api/auth/check-user?email=${encodeURIComponent(email)}`);
       const data = await response.json();
-      
+
       if (response.ok && data.exists) {
         setIsExistingUser(true);
         setAuthMode('login');
         setAuthData(prev => ({ ...prev, email }));
-        
+
         if (data.user && !user) {
           // Auto-fill form with existing user data
           setCustomerData(prev => ({
@@ -309,7 +344,7 @@ function BookingContent() {
 
   const handleCustomerChange = (field, value) => {
     setCustomerData(prev => ({ ...prev, [field]: value }));
-    
+
     // Check for existing user when email changes
     if (field === 'email' && !user) {
       // Debounce email check
@@ -331,17 +366,17 @@ function BookingContent() {
   // Handle forgot password
   const handleForgotPassword = async (e) => {
     e.preventDefault();
-    
+
     // Save current booking data before any potential navigation
     saveBookingDataToSession();
-    
+
     try {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email: customerData.email,
           returnUrl: window.location.href // Include current booking URL for return
         }),
@@ -363,10 +398,10 @@ function BookingContent() {
   // Handle authentication (login/register)
   const handleAuth = async (e) => {
     e.preventDefault();
-    
+
     // Save current booking data
     saveBookingDataToSession();
-    
+
     try {
       if (authMode === 'login') {
         const result = await login(authData.email, authData.password);
@@ -395,7 +430,7 @@ function BookingContent() {
           alert('Passwords do not match');
           return;
         }
-        
+
         // Register needs a single userData object with all required fields
         const userData = {
           email: authData.email,
@@ -403,9 +438,9 @@ function BookingContent() {
           firstName: customerData.firstName,
           lastName: customerData.lastName
         };
-        
+
         const result = await register(userData);
-        
+
         if (result.success) {
           setUser(result.user);
           setShowAuthForm(false);
@@ -465,13 +500,13 @@ function BookingContent() {
 
   const validateForm = () => {
     const errors = [];
-    
+
     // Booking validation
     if (!bookingData.pickup_location.trim()) errors.push('Pick-up location is required');
     if (!bookingData.dropoff_location.trim()) errors.push('Drop-off location is required');
     if (!bookingData.pickup_date) errors.push('Pick-up date is required');
     if (!bookingData.dropoff_date) errors.push('Drop-off date is required');
-    
+
     // Customer validation
     if (!customerData.firstName.trim()) errors.push('First name is required');
     if (!customerData.lastName.trim()) errors.push('Last name is required');
@@ -494,7 +529,7 @@ function BookingContent() {
 
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
-    
+
     const errors = validateForm();
     if (errors.length > 0) {
       alert(errors.join('\n'));
@@ -502,7 +537,7 @@ function BookingContent() {
     }
 
     setSubmitting(true);
-    
+
     try {
       const bookingPayload = {
         vehicle_id: vehicleId,
@@ -530,7 +565,7 @@ function BookingContent() {
 
       if (response.ok) {
         const result = await response.json();
-        
+
         // Redirect to success page
         router.push(`/booking-confirmation/${result.booking_id}?payment=success`);
       } else {
@@ -570,12 +605,12 @@ function BookingContent() {
           <link rel="stylesheet" href="/html-folder/css/line-awesome.css" />
           <link rel="stylesheet" href="/html-folder/css/style.css" />
         </Head>
-        
+
         <Header />
-        
+
         <div className="container" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="text-center">
-            <i className="la la-car" style={{fontSize: '4rem', color: '#ccc'}}></i>
+            <i className="la la-car" style={{ fontSize: '4rem', color: '#ccc' }}></i>
             <h3 className="mt-3">No Vehicle Selected</h3>
             <p className="text-muted">Please select a vehicle to proceed with booking.</p>
             <Link href="/search" className="btn btn-primary">
@@ -583,7 +618,7 @@ function BookingContent() {
             </Link>
           </div>
         </div>
-        
+
         <LoginModal />
         <SignupModal />
       </I18nProvider>
@@ -598,9 +633,9 @@ function BookingContent() {
           <link rel="stylesheet" href="/html-folder/css/line-awesome.css" />
           <link rel="stylesheet" href="/html-folder/css/style.css" />
         </Head>
-        
+
         <Header />
-        
+
         <div className="container" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="text-center">
             <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
@@ -609,7 +644,7 @@ function BookingContent() {
             <p className="mt-3">Loading booking details...</p>
           </div>
         </div>
-        
+
         <LoginModal />
         <SignupModal />
       </I18nProvider>
@@ -678,25 +713,25 @@ function BookingContent() {
                 <div className="form-title-wrap">
                   <h3 className="title">Book Your Vehicle</h3>
                 </div>
-                
+
                 <div className="form-content">
                   <form onSubmit={handleSubmitBooking}>
                     {/* Booking Details Section */}
                     <div className="contact-form-action">
                       <h4 className="section-title">Rental Details</h4>
-                      
+
                       <div className="row">
                         <div className="col-lg-6 responsive-column">
                           <div className="input-box">
                             <label className="label-text">Pick-up Location</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                              <input
+                              <LocationAutocomplete
                                 className="form-control"
-                                type="text"
-                                value={bookingData.pickup_location}
-                                onChange={(e) => handleBookingChange('pickup_location', e.target.value)}
                                 placeholder="Pick-up location"
+                                value={bookingData.pickup_location}
+                                onChange={(value) => handleBookingChange('pickup_location', value)}
+                                onPlaceSelect={handlePickupPlaceSelect}
                                 required
                               />
                             </div>
@@ -707,12 +742,12 @@ function BookingContent() {
                             <label className="label-text">Drop-off Location</label>
                             <div className="form-group">
                               <span className="la la-map-marker form-icon"></span>
-                              <input
+                              <LocationAutocomplete
                                 className="form-control"
-                                type="text"
-                                value={bookingData.dropoff_location}
-                                onChange={(e) => handleBookingChange('dropoff_location', e.target.value)}
                                 placeholder="Drop-off location"
+                                value={bookingData.dropoff_location}
+                                onChange={(value) => handleBookingChange('dropoff_location', value)}
+                                onPlaceSelect={handleDropoffPlaceSelect}
                                 required
                               />
                             </div>
@@ -739,7 +774,7 @@ function BookingContent() {
                             <label className="label-text">Pick-up Time</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select form-control"
                                   data-no-select2="true"
                                   value={bookingData.pickup_time}
@@ -775,7 +810,7 @@ function BookingContent() {
                             <label className="label-text">Drop-off Time</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select form-control"
                                   data-no-select2="true"
                                   value={bookingData.dropoff_time}
@@ -796,21 +831,21 @@ function BookingContent() {
                               <div className="qty-box mb-2 d-flex align-items-center justify-content-between">
                                 <label className="font-size-16 color-text-2">Number of Passengers</label>
                                 <div className="qtyBtn d-flex align-items-center">
-                                  <button 
+                                  <button
                                     type="button"
                                     className="qtyDec btn btn-sm"
                                     onClick={() => handleBookingChange('passengers', Math.max(1, bookingData.passengers - 1))}
                                   >
                                     <i className="la la-minus"></i>
                                   </button>
-                                  <input 
-                                    type="text" 
-                                    className="form-control text-center mx-2" 
+                                  <input
+                                    type="text"
+                                    className="form-control text-center mx-2"
                                     style={{ width: '60px' }}
-                                    value={bookingData.passengers} 
+                                    value={bookingData.passengers}
                                     readOnly
                                   />
-                                  <button 
+                                  <button
                                     type="button"
                                     className="qtyInc btn btn-sm"
                                     onClick={() => handleBookingChange('passengers', Math.min(vehicle?.seats || 5, bookingData.passengers + 1))}
@@ -830,14 +865,14 @@ function BookingContent() {
                     {/* Customer Details Section */}
                     <div className="contact-form-action">
                       <h4 className="section-title">Personal Information</h4>
-                      
+
                       <div className="row">
                         <div className="col-lg-2 responsive-column">
                           <div className="input-box">
                             <label className="label-text">Title</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select form-control"
                                   data-no-select2="true"
                                   value={customerData.title}
@@ -938,14 +973,14 @@ function BookingContent() {
                                     </>
                                   )}
                                 </div>
-                                <button 
-                                  type="button" 
-                                  className="btn-close" 
+                                <button
+                                  type="button"
+                                  className="btn-close"
                                   onClick={() => setShowAuthForm(false)}
                                 ></button>
                               </div>
                             </div>
-                            
+
                             <div className="row">
                               <div className="col-lg-6">
                                 <div className="input-box">
@@ -963,7 +998,7 @@ function BookingContent() {
                                   </div>
                                 </div>
                               </div>
-                              
+
                               {!isExistingUser && (
                                 <div className="col-lg-6">
                                   <div className="input-box">
@@ -983,12 +1018,12 @@ function BookingContent() {
                                 </div>
                               )}
                             </div>
-                            
+
                             {/* Forgot Password Section */}
                             {isExistingUser && !showForgotPassword && (
                               <div className="text-center mb-3">
-                                <button 
-                                  type="button" 
+                                <button
+                                  type="button"
                                   className="btn btn-link text-primary p-0"
                                   onClick={() => setShowForgotPassword(true)}
                                 >
@@ -996,7 +1031,7 @@ function BookingContent() {
                                 </button>
                               </div>
                             )}
-                            
+
                             {/* Forgot Password Form */}
                             {showForgotPassword && (
                               <div className="col-12">
@@ -1013,20 +1048,20 @@ function BookingContent() {
                                         </div>
                                       )}
                                     </div>
-                                    <button 
-                                      type="button" 
-                                      className="btn-close" 
+                                    <button
+                                      type="button"
+                                      className="btn-close"
                                       onClick={() => {
                                         setShowForgotPassword(false);
                                         setResetEmailSent(false);
                                       }}
                                     ></button>
                                   </div>
-                                  
+
                                   {!resetEmailSent && (
                                     <div className="mt-3">
-                                      <button 
-                                        type="button" 
+                                      <button
+                                        type="button"
                                         className="btn btn-warning btn-sm"
                                         onClick={handleForgotPassword}
                                       >
@@ -1037,13 +1072,13 @@ function BookingContent() {
                                 </div>
                               </div>
                             )}
-                            
+
                             {/* Authentication Buttons */}
                             {!showForgotPassword && (
                               <div className="col-12">
                                 <div className="d-flex gap-2 mb-3">
-                                  <button 
-                                    type="button" 
+                                  <button
+                                    type="button"
                                     className="btn btn-primary flex-fill"
                                     onClick={handleAuth}
                                     disabled={!authData.password || (authMode === 'register' && !authData.confirmPassword)}
@@ -1111,7 +1146,7 @@ function BookingContent() {
                             <label className="label-text">Country</label>
                             <div className="form-group select2-container-wrapper">
                               <div className="select-contain w-auto">
-                                <select 
+                                <select
                                   className="select-contain-select form-control"
                                   data-no-select2="true"
                                   value={customerData.country}
@@ -1164,7 +1199,7 @@ function BookingContent() {
                     {/* Extras Section */}
                     <div className="contact-form-action">
                       <h4 className="section-title">Additional Options</h4>
-                      
+
                       <div className="row">
                         <div className="col-lg-6 responsive-column">
                           <div className="custom-checkbox">
@@ -1176,7 +1211,7 @@ function BookingContent() {
                               onChange={() => handleExtraChange('gps')}
                             />
                             <label htmlFor="gps">
-                              GPS Navigation System 
+                              GPS Navigation System
                               <span className="ms-2 text-success">+${extraCosts.gps}/day</span>
                             </label>
                           </div>
@@ -1191,7 +1226,7 @@ function BookingContent() {
                               onChange={() => handleExtraChange('childSeat')}
                             />
                             <label htmlFor="childSeat">
-                              Child Safety Seat 
+                              Child Safety Seat
                               <span className="ms-2 text-success">+${extraCosts.childSeat}/day</span>
                             </label>
                           </div>
@@ -1206,7 +1241,7 @@ function BookingContent() {
                               onChange={() => handleExtraChange('additionalDriver')}
                             />
                             <label htmlFor="additionalDriver">
-                              Additional Driver 
+                              Additional Driver
                               <span className="ms-2 text-success">+${extraCosts.additionalDriver}/day</span>
                             </label>
                           </div>
@@ -1221,7 +1256,7 @@ function BookingContent() {
                               onChange={() => handleExtraChange('insurance')}
                             />
                             <label htmlFor="insurance">
-                              Full Insurance Coverage 
+                              Full Insurance Coverage
                               <span className="ms-2 text-success">+${extraCosts.insurance}/day</span>
                             </label>
                           </div>
@@ -1236,7 +1271,7 @@ function BookingContent() {
                               onChange={() => handleExtraChange('wifi')}
                             />
                             <label htmlFor="wifi">
-                              WiFi Hotspot 
+                              WiFi Hotspot
                               <span className="ms-2 text-success">+${extraCosts.wifi}/day</span>
                             </label>
                           </div>
@@ -1251,7 +1286,7 @@ function BookingContent() {
                               onChange={() => handleExtraChange('fuelService')}
                             />
                             <label htmlFor="fuelService">
-                              Prepaid Fuel Service 
+                              Prepaid Fuel Service
                               <span className="ms-2 text-success">+${extraCosts.fuelService}/rental</span>
                             </label>
                           </div>
@@ -1264,7 +1299,7 @@ function BookingContent() {
                     {/* Payment Section */}
                     <div className="contact-form-action">
                       <h4 className="section-title">Payment Information</h4>
-                      
+
                       <div className="payment-option mb-4">
                         <div className="custom-checkbox">
                           <input
@@ -1406,7 +1441,7 @@ function BookingContent() {
                           I agree with <Link href="/terms">Terms of Service</Link> and <Link href="/privacy">Privacy Statement</Link>
                         </label>
                       </div>
-                      
+
                       <div className="custom-checkbox mb-0">
                         <input
                           type="checkbox"
@@ -1422,8 +1457,8 @@ function BookingContent() {
                     </div>
 
                     <div className="btn-box pt-3">
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         className="theme-btn"
                         disabled={submitting}
                       >
@@ -1448,14 +1483,14 @@ function BookingContent() {
                 <div className="form-title-wrap">
                   <h3 className="title">Booking Summary</h3>
                 </div>
-                
+
                 <div className="form-content">
                   {/* Vehicle Details */}
                   <div className="booking-car-details mb-4">
                     <div className="d-flex">
                       <div className="car-image me-3">
-                        <img 
-                          src={vehicle?.images?.[0] || '/html-folder/images/car-img.jpg'} 
+                        <img
+                          src={vehicle?.images?.[0] || '/html-folder/images/car-img.jpg'}
                           alt={`${vehicle?.brand} ${vehicle?.model}`}
                           className="img-fluid rounded"
                           style={{ width: '80px', height: '60px', objectFit: 'cover' }}
@@ -1502,7 +1537,7 @@ function BookingContent() {
                   {/* Price Breakdown */}
                   <div className="price-breakdown">
                     <h6>Price Breakdown</h6>
-                    
+
                     <div className="d-flex justify-content-between mb-2">
                       <span>Vehicle rental ({calculateRentalDays()} day{calculateRentalDays() > 1 ? 's' : ''})</span>
                       <span>${calculateSubtotal().toFixed(2)}</span>
@@ -1521,11 +1556,11 @@ function BookingContent() {
                       <div key={key} className="d-flex justify-content-between mb-2">
                         <span>
                           {key === 'gps' ? 'GPS Navigation' :
-                           key === 'childSeat' ? 'Child Seat' :
-                           key === 'additionalDriver' ? 'Additional Driver' :
-                           key === 'insurance' ? 'Full Insurance' :
-                           key === 'wifi' ? 'WiFi Hotspot' :
-                           key === 'fuelService' ? 'Prepaid Fuel' : key}
+                            key === 'childSeat' ? 'Child Seat' :
+                              key === 'additionalDriver' ? 'Additional Driver' :
+                                key === 'insurance' ? 'Full Insurance' :
+                                  key === 'wifi' ? 'WiFi Hotspot' :
+                                    key === 'fuelService' ? 'Prepaid Fuel' : key}
                           {key !== 'fuelService' && ` (${calculateRentalDays()} day${calculateRentalDays() > 1 ? 's' : ''})`}
                         </span>
                         <span>
