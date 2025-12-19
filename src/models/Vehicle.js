@@ -75,81 +75,85 @@ export class Vehicle {
   }
 
   static async search(filters = {}) {
-    // Ultra-simple query - get vehicles then apply light normalization and optional location filtering
-    let sql = `SELECT * FROM vehicles LIMIT ? OFFSET ?`;
-
-    // Pagination only
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-    const offset = (page - 1) * limit;
-    const values = [limit, offset];
-
-    console.log('Executing ultra-simple query:', sql);
-    console.log('Query values:', values);
-
-    // Helper: normalize category from available hints
-    const normalizeCategory = (v) => {
-      const raw = String(v.category || v.type || v.body_type || '').toUpperCase();
-      if (raw.includes('SUV') || /\b(CRV|CR-V|RAV4|X5|Q5|HIGHLANDER|TIGUAN|ESCAPE|TAHOE|SUBURBAN)\b/i.test(String(v.model || ''))) {
-        return 'SUV';
-      }
-      if (raw.includes('CONVERTIBLE')) return 'CONVERTIBLE';
-      if (raw.includes('COUPE')) return 'COUPE';
-      if (raw.includes('HATCH')) return 'HATCHBACK';
-      if (raw.includes('VAN')) return 'MINIVAN';
-      if (raw.includes('SEDAN') || raw.includes('SMALL CAR') || raw.includes('CAR')) return 'SEDAN';
-      // Fallback: infer from doors/seats (2 doors → coupe likely)
-      if (Number(v.doors) === 2) return 'COUPE';
-      return 'SEDAN';
-    };
-
     try {
+      // Base query with JOIN to get agency details directly
+      let sql = `
+        SELECT v.*, 
+               a.name as agency_name, 
+               a.address_city as agency_city,
+               a.pickup_locations as agency_pickup_locations,
+               a.rating as agency_rating
+        FROM vehicles v
+        LEFT JOIN agencies a ON v.agency_id = a.id
+        WHERE v.is_available = 1 AND a.is_active = 1
+      `;
+      
+      const values = [];
+
+      // Dynamic filtering conditions
+      if (filters.pickup_location) {
+        // Filter by agency city OR pickup locations (searching within JSON string)
+        sql += ` AND (a.address_city LIKE ? OR a.pickup_locations LIKE ?)`;
+        const loc = `%${filters.pickup_location}%`;
+        values.push(loc, loc);
+      }
+
+      // Feature filters (preserved from previous logical intent)
+      if (filters.brand) {
+        sql += ` AND v.brand LIKE ?`;
+        values.push(`%${filters.brand}%`);
+      }
+      
+      if (filters.category) {
+        // Simple string match for category if provided directly
+        sql += ` AND (v.category_id LIKE ? OR v.type LIKE ?)`; // fallback column names
+        values.push(`%${filters.category}%`, `%${filters.category}%`);
+      }
+
+      // Pagination
+      const page = filters.page || 1;
+      const limit = filters.limit || 10;
+      const offset = (page - 1) * limit;
+      
+      sql += ` ORDER BY v.created_at DESC LIMIT ? OFFSET ?`;
+      values.push(limit, offset);
+
+      console.log('Executing SQL search:', sql);
+      console.log('Values:', values);
+
       const vehicles = await query(sql, values);
-      console.log('Raw database result:', vehicles);
+      
+      // Post-processing to ensure consistent data structure
+      return vehicles.map((vehicle, index) => {
+        // Parse images/features if they are strings
+        const images = vehicle.images ? (typeof vehicle.images === 'string' ? JSON.parse(vehicle.images) : vehicle.images) : ['/html-folder/images/car-img.jpg'];
+        
+        // Normalize category similar to before
+        let category_name = 'SEDAN';
+        const rawCat = String(vehicle.category_name || vehicle.category || vehicle.type || '').toUpperCase();
+        if (rawCat.includes('SUV')) category_name = 'SUV';
+        else if (rawCat.includes('CONVERTIBLE')) category_name = 'CONVERTIBLE';
+        else if (rawCat.includes('COUPE')) category_name = 'COUPE';
+        else if (rawCat.includes('HATCH')) category_name = 'HATCHBACK';
+        else if (rawCat.includes('MINIVAN')) category_name = 'MINIVAN';
+        
+        return {
+          ...vehicle,
+          id: vehicle.id || vehicle.vehicle_id, 
+          category_name,
+          agency_name: vehicle.agency_name || 'Car Rental Agency',
+          agency_city: vehicle.agency_city || '',
+          agency_rating: vehicle.agency_rating || 4.5,
+          images,
+          // Ensure numeric pricing
+          low_price: Number(vehicle.low_price || vehicle.daily_rate || 50),
+          high_price: Number(vehicle.high_price || (vehicle.daily_rate * 1.5) || 100),
+          holidays_price: Number(vehicle.holidays_price || (vehicle.daily_rate * 2) || 150),
+        };
+      });
 
-      // Optional location-based filtering (best-effort)
-      const tokens = String(filters.pickup_location || '').toLowerCase().split(/[\s,]+/).filter(t => t.length > 2);
-      let scoped = Array.isArray(vehicles) ? vehicles.slice() : [];
-      if (tokens.length > 0) {
-        const filteredByLoc = scoped.filter(v => {
-          const loc = String(v.location || v.city || '').toLowerCase();
-          if (!loc) return true; // keep if location unknown
-          return tokens.some(t => loc.includes(t));
-        });
-        // If filtering yields nothing (no location metadata), keep original list to avoid empty results
-        if (filteredByLoc.length > 0) scoped = filteredByLoc;
-      }
-
-      // Deterministic variety per pickup location: rotate list based on hash
-      if ((filters.pickup_location || '').length > 0 && scoped.length > 0) {
-        const s = String(filters.pickup_location);
-        let hash = 0;
-        for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
-        const start = hash % scoped.length;
-        scoped = scoped.slice(start).concat(scoped.slice(0, start));
-      }
-
-      return scoped.map((vehicle, index) => ({
-        ...vehicle,
-        id: vehicle.id || vehicle.vehicle_id || vehicle.ID || index + 1, // Ensure we have an ID
-        category_name: normalizeCategory(vehicle),
-        agency_name: vehicle.agency || 'Car Rental Agency',
-        agency_city: vehicle.city || vehicle.location || '',
-        agency_rating: 4.5,
-        images: vehicle.images ? (typeof vehicle.images === 'string' ? JSON.parse(vehicle.images) : vehicle.images) : ['/html-folder/images/car-img.jpg'],
-        low_price: vehicle.low_price || vehicle.price_low || vehicle.daily_rate || 50,
-        high_price: vehicle.high_price || vehicle.price_high || (vehicle.daily_rate * 1.5) || 100,
-        holidays_price: vehicle.holidays_price || vehicle.price_holiday || (vehicle.daily_rate * 2) || 150,
-        brand: vehicle.make || vehicle.brand || 'Generic',
-        model: vehicle.model || 'Car',
-        year: vehicle.year || 2023,
-        seats: vehicle.seats || 5,
-        energy: vehicle.energy || vehicle.fuel_type || 'petrol',
-        gear_type: vehicle.gear_type || vehicle.transmission || 'automatic'
-      }));
     } catch (error) {
-      console.error('Even simple query failed:', error);
-      // Return empty array if database query fails
+      console.error('Vehicle search failed:', error);
       return [];
     }
   }
