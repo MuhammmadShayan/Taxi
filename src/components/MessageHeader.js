@@ -6,9 +6,14 @@ export default function MessageHeader({ onClick }) {
   const { unreadCount } = useNotification();
   
   return (
-    <div className="notification-item me-3" onClick={onClick}>
-      <div className="dropdown-toggle" role="button" style={{ cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}>
-        <i className="la la-envelope" style={{ fontSize: '28px', color: '#212529' }}></i>
+    <div className="notification-item me-3">
+      <div 
+        className="dropdown-toggle" 
+        role="button" 
+        onClick={onClick}
+        style={{ cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}
+      >
+        <i className="la la-envelope" style={{ fontSize: '28px', color: '#fff' }}></i>
         {unreadCount > 0 && (
           <span 
             className="badge bg-danger" 
