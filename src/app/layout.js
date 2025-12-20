@@ -4,12 +4,12 @@ import { NotificationProvider } from '../contexts/NotificationContext';
 import { I18nProvider } from '../i18n/I18nProvider';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 import Script from 'next/script';
-
+import GooglePlacesScript from '../components/GooglePlacesScript';
 
 export const metadata = {
   title: 'KIRASTAY - Multi-vendor Vehicle Rental Platform',
   description: 'KIRASTAY connects Moroccan vehicle rental agencies with global customers. Search, book, and rent vehicles with trusted local partners.',
-  keywords: ['vehicle rental', 'car rental', 'Morocco', 'booking platform', 'KIRASTAY', 'multi-vendor', 'travel']
+  keywords: ['vehicle rental','car rental','Morocco','booking platform','KIRASTAY','multi-vendor','travel']
 };
 
 export default function RootLayout({ children }) {
@@ -45,13 +45,14 @@ export default function RootLayout({ children }) {
         <I18nProvider>
           <CurrencyProvider>
             <AuthProvider>
-              <NotificationProvider>
-                {children}
-              </NotificationProvider>
-            </AuthProvider>
+            <NotificationProvider>
+              {children}
+            </NotificationProvider>
+          </AuthProvider>
           </CurrencyProvider>
+          <GooglePlacesScript />
         </I18nProvider>
-
+        
         {/* Essential JavaScript files loaded in proper order to prevent conflicts */}
         <script src="/html-folder/js/jquery-3.7.1.min.js"></script>
         <script src="/js/prevent-select2-react.js"></script>
