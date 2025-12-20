@@ -1,82 +1,80 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import Script from 'next/script'; // Import Script from next/script
-import { useI18n } from '../i18n/I18nProvider';
+import { useState, useRef } from 'react';
+import { Autocomplete } from '@react-google-maps/api';
 
 const LocationAutocomplete = ({
-  placeholder = "Enter location",
-  onPlaceSelect = () => { },
-  value = "",
-  onChange = () => { },
-  className = "form-control",
-  required = false,
-  ...props
+  label,
+  placeholder = "Enter pick-up city, airport, or station",
+  value,
+  onChange,
+  onLocationChange, // Callback for Full place object
+  onPlaceSelect, // Alias for onLocationChange to support existing usage
+  className,
+  name,
+  required = false
 }) => {
-  const { lang } = useI18n();
-  const inputRef = useRef(null);
-  const autoCompleteRef = useRef(null);
-  const [inputValue, setInputValue] = useState(value);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [autocomplete, setAutocomplete] = useState(null);
 
-  // Update input value when prop changes
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+  const onLoad = (autocompleteInstance) => {
+    setAutocomplete(autocompleteInstance);
+  };
 
-  useEffect(() => {
-    if (!scriptLoaded) return;
+  const onPlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
 
-    if (window.google && window.google.maps && window.google.maps.places && inputRef.current) {
-      // Check if autocomplete is already initialized
-      if (!autoCompleteRef.current) {
-        autoCompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-          fields: ["formatted_address", "geometry", "name", "place_id"],
-          strictBounds: false,
-        });
+      const formattedAddress = place.formatted_address || place.name;
+      const placeId = place.place_id;
 
-        autoCompleteRef.current.addListener("place_changed", () => {
-          const place = autoCompleteRef.current.getPlace();
-
-          if (place.formatted_address) {
-            setInputValue(place.formatted_address);
-            onChange(place.formatted_address);
-            onPlaceSelect(place);
-          } else if (place.name) {
-            // Fallback if formatted_address is missing (rare)
-            setInputValue(place.name);
-            onChange(place.name);
-            onPlaceSelect(place);
-          }
-        });
+      // Call the specialized callback with all details if provided
+      if (onLocationChange) {
+        onLocationChange(place);
       }
-    }
-  }, [scriptLoaded]);
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    onChange(e.target.value);
+      if (onPlaceSelect) {
+        onPlaceSelect(place);
+      }
+
+      // Call the standard onChange with just the string value
+      if (onChange) {
+        onChange(formattedAddress);
+      }
+    } else {
+      console.log('Autocomplete is not loaded yet!');
+    }
+  };
+
+  // Bias results toward cities, airports, and train stations
+  const options = {
+    types: ['(cities)', 'airport', 'train_station'],
+    componentRestrictions: { country: [] }, // Global search by default
+    fields: ["formatted_address", "geometry", "name", "place_id"]
   };
 
   return (
-    <div className="position-relative" style={{ width: '100%' }}>
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyAC9IhpN0ggVpnvBYOkwMvwKzcZuPxuXX0'}&libraries=places&loading=async`}
-        strategy="afterInteractive"
-        onLoad={() => setScriptLoaded(true)}
-        onError={(e) => console.error("Error loading Google Maps script", e)}
-      />
+    <div className="input-box w-full">
+      {label && <label className="label-text text-gray-700 font-medium mb-2">{label}</label>}
+      <div className="form-group relative">
+        <span className="la la-map-marker form-icon absolute left-3 top-3 text-gray-400 z-10"></span>
 
-      <input
-        ref={inputRef}
-        type="text"
-        className={className}
-        placeholder={placeholder}
-        value={inputValue}
-        onChange={handleInputChange}
-        required={required}
-        autoComplete="off"
-        {...props}
-      />
+        <Autocomplete
+          onLoad={onLoad}
+          onPlaceChanged={onPlaceChanged}
+          options={options}
+          className="w-full"
+        >
+          <input
+            type="text"
+            name={name}
+            className={`form-control w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className || ''}`}
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange && onChange(e.target.value)}
+            required={required}
+            autoComplete="off"
+          />
+        </Autocomplete>
+      </div>
     </div>
   );
 };

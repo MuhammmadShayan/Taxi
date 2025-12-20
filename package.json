@@ -16,6 +16,7 @@
   "dependencies": {
     "@fancyapps/fancybox": "^3.5.7",
     "@ommu/animated-headline": "^1.0.0",
+    "@react-google-maps/api": "^2.20.8",
     "@stripe/stripe-js": "^2.4.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
