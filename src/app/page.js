@@ -134,32 +134,48 @@ export default function Home() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle place selection from Google Places Autocomplete
+  // Handle place selection from LocationAutocomplete (supports both maps and locationiq)
   const handlePickupPlaceSelect = (place) => {
+    if (!place) return;
     let lat = null, lng = null;
+
+    // Handle Google Maps structure
     if (place.geometry && place.geometry.location) {
       lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
       lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
     }
+    // Handle LocationIQ structure
+    else if (place.lat) {
+      lat = place.lat;
+      lng = place.lng || place.lon; // LocationIQ can be lon
+    }
 
     setFormData(prev => ({
       ...prev,
-      pickup_location: place.formatted_address || place.name,
+      pickup_location: place.formatted_address || place.address || place.name || place.display_name,
       pickup_latitude: lat,
       pickup_longitude: lng
     }));
   };
 
   const handleDropoffPlaceSelect = (place) => {
+    if (!place) return;
     let lat = null, lng = null;
+
+    // Handle Google Maps structure
     if (place.geometry && place.geometry.location) {
       lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
       lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
     }
+    // Handle LocationIQ structure
+    else if (place.lat) {
+      lat = place.lat;
+      lng = place.lng || place.lon;
+    }
 
     setFormData(prev => ({
       ...prev,
-      dropoff_location: place.formatted_address || place.name,
+      dropoff_location: place.formatted_address || place.address || place.name || place.display_name,
       dropoff_latitude: lat,
       dropoff_longitude: lng
     }));
@@ -803,11 +819,11 @@ export default function Home() {
                   <div className="card-body d-flex align-items-center justify-content-between">
                     <div>
                       <h3 className="card-title mb-0">
-                        <Link href="/destinations/sanfrancisco">San Francisco</Link>
+                        <Link href="/destinations/newjersey">New Jersey</Link>
                       </h3>
                     </div>
                     <div>
-                      <Link href="/destinations/sanfrancisco" className="theme-btn theme-btn-small border-0">
+                      <Link href="/destinations/newjersey" className="theme-btn theme-btn-small border-0">
                         {t('destinations.exploreMore')} <i className="la la-arrow-right ms-1"></i>
                       </Link>
                     </div>
@@ -818,16 +834,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Scripts are loaded in layout.js to prevent conflicts and 404 errors */}
+        {/* ================================
+            START FOOTER AREA
+        ================================= */}
+        <Footer />
+
+        {/* Login/Signup Modals */}
+        <LoginModal />
+        <SignupModal />
       </div>
-
-      {/* Footer */}
-      <Footer />
-
-      {/* Modal Components with AuthContext Integration */}
-      <LoginModal />
-      <SignupModal />
     </>
   );
 }
-
