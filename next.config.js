@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
+
         protocol: 'https',
         hostname: 'holikey.com',
       },
@@ -160,10 +161,10 @@ const nextConfig = {
           },
         },
       };
-      
+
       // DON'T override devtool in development mode - causes performance issues
       // Let Next.js use its default devtool setting
-      
+
       // Exclude heavy assets from watch
       config.watchOptions = {
         ignored: [
@@ -190,26 +191,26 @@ const nextConfig = {
 
   // Output configuration for deployment
   output: 'standalone',
-  
+
   // Enable static optimization
   trailingSlash: false,
-  
+
   // Configure build behavior
   generateEtags: false,
   compress: true,
-  
+
   // Performance monitoring
   poweredByHeader: false,
-  
+
   // Development configuration
   eslint: {
     ignoreDuringBuilds: process.env.NODE_ENV === 'development', // Skip ESLint in dev for faster builds
   },
-  
+
   typescript: {
     ignoreBuildErrors: process.env.NODE_ENV === 'development', // Skip TypeScript errors in dev
   },
-  
+
   // Performance optimizations for development
   experimental: {
     // Optimize CSS handling
