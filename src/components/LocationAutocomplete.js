@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { Autocomplete } from '@react-google-maps/api';
 
 const LocationAutocomplete = ({
@@ -45,11 +45,12 @@ const LocationAutocomplete = ({
   };
 
   // Bias results toward cities, airports, and train stations
-  const options = {
+  // Note: Mixing type collections like '(cities)' with establishment types like 'airport' 
+  // can sometimes strictly filter. If issues arise, try removing 'types' to show all results.
+  const options = useMemo(() => ({
     types: ['(cities)', 'airport', 'train_station'],
-    componentRestrictions: { country: [] }, // Global search by default
-    fields: ["formatted_address", "geometry", "name", "place_id"]
-  };
+    fields: ["formatted_address", "geometry", "name", "place_id"],
+  }), []);
 
   return (
     <div className="input-box w-full">
