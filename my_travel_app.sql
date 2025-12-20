@@ -189,10 +189,6 @@ CREATE TABLE `car_booking_searches` (
   `pickup_time` time DEFAULT NULL,
   `dropoff_date` date DEFAULT NULL,
   `dropoff_time` time DEFAULT NULL,
-  `pickup_latitude` decimal(10,8) DEFAULT NULL,
-  `pickup_longitude` decimal(10,8) DEFAULT NULL,
-  `dropoff_latitude` decimal(10,8) DEFAULT NULL,
-  `dropoff_longitude` decimal(10,8) DEFAULT NULL,
   `search_timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -860,10 +856,6 @@ CREATE TABLE `reservations` (
   `end_date` date NOT NULL,
   `pickup_time` time DEFAULT NULL,
   `dropoff_time` time DEFAULT NULL,
-  `pickup_latitude` decimal(10,8) DEFAULT NULL,
-  `pickup_longitude` decimal(10,8) DEFAULT NULL,
-  `dropoff_latitude` decimal(10,8) DEFAULT NULL,
-  `dropoff_longitude` decimal(10,8) DEFAULT NULL,
   `status` enum('pending','confirmed','active','completed','canceled','no_show') DEFAULT 'pending',
   `cancellation_reason` text DEFAULT NULL,
   `cancellation_deadline` datetime DEFAULT NULL,

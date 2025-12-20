@@ -4,7 +4,6 @@ import { NotificationProvider } from '../contexts/NotificationContext';
 import { I18nProvider } from '../i18n/I18nProvider';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 import Script from 'next/script';
-import GooglePlacesScript from '../components/GooglePlacesScript';
 
 export const metadata = {
   title: 'KIRASTAY - Multi-vendor Vehicle Rental Platform',
@@ -50,7 +49,6 @@ export default function RootLayout({ children }) {
             </NotificationProvider>
           </AuthProvider>
           </CurrencyProvider>
-          <GooglePlacesScript />
         </I18nProvider>
         
         {/* Essential JavaScript files loaded in proper order to prevent conflicts */}
