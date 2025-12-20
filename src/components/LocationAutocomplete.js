@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 /**
  * LocationAutocomplete using OpenStreetMap (Nominatim API)
  * This is free and does not require an API key.
- * Usage Policy: https://operations.osmfoundation.org/policies/nominatim/
  */
 
 const LocationAutocomplete = ({
@@ -24,14 +23,23 @@ const LocationAutocomplete = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const wrapperRef = useRef(null);
-  const isSelectedRef = useRef(false);
 
-  // Sync with prop value
+  // Track if the change was from a selection to avoid re-fetching
+  const isSelectedRef = useRef(false);
+  // Track previous typed value to trigger fetch
+  const lastTypedValueRef = useRef("");
+
+  // Sync with prop value (important for initial load and external resets)
   useEffect(() => {
-    if (!isSelectedRef.current) {
-      setInputValue(value);
+    // Only update internal input if it's different from current state
+    // AND we didn't just select this value ourselves
+    if (value !== inputValue && !isSelectedRef.current) {
+      setInputValue(value || "");
     }
-    isSelectedRef.current = false;
+    // Always clear the selection flag after sync
+    if (value === inputValue) {
+      isSelectedRef.current = false;
+    }
   }, [value]);
 
   // Handle outside click to close dropdown
@@ -54,21 +62,20 @@ const LocationAutocomplete = ({
     setIsLoading(true);
     try {
       // OpenStreetMap Nominatim API
-      // We use 'search' for autocomplete-like behavior
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
 
       const response = await fetch(url, {
         headers: {
           'Accept-Language': 'en-US,en;q=0.9',
-          // Nominatim requires a User-Agent identifying the application
           'User-Agent': 'TaxiRentalPlatform/1.0'
         }
       });
 
       if (response.ok) {
         const data = await response.json();
-        setSuggestions(Array.isArray(data) ? data : []);
-        setShowSuggestions(true);
+        const results = Array.isArray(data) ? data : [];
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
         setSelectedIndex(-1);
       } else {
         setSuggestions([]);
@@ -81,20 +88,32 @@ const LocationAutocomplete = ({
     }
   };
 
-  // Debounce API calls
+  // Debounce API calls based on internal typing state
   useEffect(() => {
+    // Don't fetch if it was a selection or if value is too short
+    if (isSelectedRef.current || !inputValue || inputValue.length < 3) {
+      return;
+    }
+
+    // Don't fetch if we already fetched for this exact string
+    if (inputValue === lastTypedValueRef.current) {
+      return;
+    }
+
     const timeOutId = setTimeout(() => {
-      // Only fetch if input changed and isn't what was just selected
-      if (inputValue && inputValue.length >= 3 && inputValue !== value) {
-        fetchSuggestions(inputValue);
-      }
-    }, 400); // 400ms debounce for OSM to be respectful of rate limits
+      lastTypedValueRef.current = inputValue;
+      fetchSuggestions(inputValue);
+    }, 500); // 500ms for OSM stability
+
     return () => clearTimeout(timeOutId);
   }, [inputValue]);
 
   const handleInputChange = (e) => {
     const newVal = e.target.value;
+    isSelectedRef.current = false; // Reset selection flag on typing
     setInputValue(newVal);
+
+    // Notify parent immediately
     if (onChange) onChange(newVal);
 
     if (newVal === '') {
@@ -105,7 +124,9 @@ const LocationAutocomplete = ({
 
   const selectPlace = (place) => {
     const formatted = place.display_name;
-    isSelectedRef.current = true;
+    isSelectedRef.current = true; // Block subsequent fetch for this value
+    lastTypedValueRef.current = formatted;
+
     setInputValue(formatted);
     setShowSuggestions(false);
     setSuggestions([]);
@@ -175,7 +196,8 @@ const LocationAutocomplete = ({
             paddingTop: '12px',
             paddingBottom: '12px',
             borderRadius: '8px',
-            border: '1px solid #ddd'
+            border: '1px solid #ddd',
+            backgroundColor: '#fff'
           }}
         />
 
@@ -200,10 +222,10 @@ const LocationAutocomplete = ({
               backgroundColor: '#fff',
               border: '1px solid #eee',
               borderRadius: '8px',
-              zIndex: 9999,
+              zIndex: 1000,
               overflow: 'hidden',
               marginTop: '5px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+              boxShadow: '0 10px 25px rgba(0,0,0,0.15)'
             }}
           >
             <ul className="list-unstyled mb-0" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
@@ -215,7 +237,7 @@ const LocationAutocomplete = ({
                   style={{
                     padding: '12px 15px',
                     cursor: 'pointer',
-                    backgroundColor: selectedIndex === index ? '#f8f9fa' : '#fff',
+                    backgroundColor: selectedIndex === index ? '#f0f4f8' : '#fff',
                     borderBottom: '1px solid #f1f1f1',
                     transition: 'background 0.2s',
                     textAlign: 'left'
