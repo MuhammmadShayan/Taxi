@@ -5,7 +5,6 @@ import Script from 'next/script';
 import Link from 'next/link';
 import ClientOnlySelectors from '../components/ClientOnlySelectors';
 import LocationAutocomplete from '../components/LocationAutocomplete';
-import GoogleMapsLoader from '../components/GoogleMapsLoader';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -249,199 +248,197 @@ export default function Home() {
                       <h3 className="title pb-3">{t('home.search_form.title')}</h3>
                       <div className="section-block"></div>
                       <div className="contact-form-action pt-3">
-                        <GoogleMapsLoader>
-                          <form onSubmit={handleSearch} className="row">
-                            <div className="col-lg-6">
-                              <div className="input-box">
-                                <label className="label-text">{t('hero.pickup_location')}</label>
-                                <div className="form-group">
-                                  <span className="la la-map-marker form-icon"></span>
-                                  <LocationAutocomplete
-                                    placeholder={t('home.search_form.pickup_placeholder')}
-                                    onPlaceSelect={handlePickupPlaceSelect}
-                                    value={formData.pickup_location}
-                                    onChange={(value) => setFormData(prev => ({ ...prev, pickup_location: value }))}
-                                    className="form-control"
-                                    required
-                                  />
-                                </div>
+                        <form onSubmit={handleSearch} className="row">
+                          <div className="col-lg-6">
+                            <div className="input-box">
+                              <label className="label-text">{t('hero.pickup_location')}</label>
+                              <div className="form-group">
+                                <span className="la la-map-marker form-icon"></span>
+                                <LocationAutocomplete
+                                  placeholder={t('home.search_form.pickup_placeholder')}
+                                  onPlaceSelect={handlePickupPlaceSelect}
+                                  value={formData.pickup_location}
+                                  onChange={(value) => setFormData(prev => ({ ...prev, pickup_location: value }))}
+                                  className="form-control"
+                                  required
+                                />
                               </div>
                             </div>
-                            <div className="col-lg-6">
-                              <div className="input-box">
-                                <label className="label-text">{t('hero.dropoff_location')}</label>
-                                <div className="form-group">
-                                  <span className="la la-map-marker form-icon"></span>
-                                  <LocationAutocomplete
-                                    placeholder={t('home.search_form.dropoff_placeholder')}
-                                    onPlaceSelect={handleDropoffPlaceSelect}
-                                    value={formData.dropoff_location}
-                                    onChange={(value) => setFormData(prev => ({ ...prev, dropoff_location: value }))}
-                                    className="form-control"
-                                  />
-                                </div>
+                          </div>
+                          <div className="col-lg-6">
+                            <div className="input-box">
+                              <label className="label-text">{t('hero.dropoff_location')}</label>
+                              <div className="form-group">
+                                <span className="la la-map-marker form-icon"></span>
+                                <LocationAutocomplete
+                                  placeholder={t('home.search_form.dropoff_placeholder')}
+                                  onPlaceSelect={handleDropoffPlaceSelect}
+                                  value={formData.dropoff_location}
+                                  onChange={(value) => setFormData(prev => ({ ...prev, dropoff_location: value }))}
+                                  className="form-control"
+                                />
                               </div>
                             </div>
-                            <div className="col-lg-8 col-sm-7">
-                              <div className="input-box">
-                                <label className="label-text">{t('hero.pickup_date')}</label>
-                                <div className="form-group">
-                                  <span className="la la-calendar form-icon"></span>
-                                  <input
-                                    className="form-control"
-                                    type="date"
-                                    name="pickup_date"
-                                    value={formData.pickup_date}
+                          </div>
+                          <div className="col-lg-8 col-sm-7">
+                            <div className="input-box">
+                              <label className="label-text">{t('hero.pickup_date')}</label>
+                              <div className="form-group">
+                                <span className="la la-calendar form-icon"></span>
+                                <input
+                                  className="form-control"
+                                  type="date"
+                                  name="pickup_date"
+                                  value={formData.pickup_date}
+                                  onChange={handleInputChange}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-lg-4 col-sm-5 ps-0">
+                            <div className="input-box">
+                              <label className="label-text">{t('common.time')}</label>
+                              <div className="form-group select2-container-wrapper">
+                                <div className="select-contain select-contain-shadow w-auto">
+                                  <select
+                                    className="select-contain-select"
+                                    name="pickup_time"
+                                    value={formData.pickup_time}
                                     onChange={handleInputChange}
-                                  />
+                                  >
+                                    <option value="12:00AM">12:00 AM</option>
+                                    <option value="12:30AM">12:30 AM</option>
+                                    <option value="1:00AM">1:00 AM</option>
+                                    <option value="1:30AM">1:30 AM</option>
+                                    <option value="2:00AM">2:00 AM</option>
+                                    <option value="2:30AM">2:30 AM</option>
+                                    <option value="3:00AM">3:00 AM</option>
+                                    <option value="3:30AM">3:30 AM</option>
+                                    <option value="4:00AM">4:00 AM</option>
+                                    <option value="4:30AM">4:30 AM</option>
+                                    <option value="5:00AM">5:00 AM</option>
+                                    <option value="5:30AM">5:30 AM</option>
+                                    <option value="6:00AM">6:00 AM</option>
+                                    <option value="6:30AM">6:30 AM</option>
+                                    <option value="7:00AM">7:00 AM</option>
+                                    <option value="7:30AM">7:30 AM</option>
+                                    <option value="8:00AM">8:00 AM</option>
+                                    <option value="8:30AM">8:30 AM</option>
+                                    <option value="9:00AM">9:00 AM</option>
+                                    <option value="9:30AM">9:30 AM</option>
+                                    <option value="10:00AM">10:00 AM</option>
+                                    <option value="10:30AM">10:30 AM</option>
+                                    <option value="11:00AM">11:00 AM</option>
+                                    <option value="11:30AM">11:30 AM</option>
+                                    <option value="12:00PM">12:00 PM</option>
+                                    <option value="12:30PM">12:30 PM</option>
+                                    <option value="1:00PM">1:00 PM</option>
+                                    <option value="1:30PM">1:30 PM</option>
+                                    <option value="2:00PM">2:00 PM</option>
+                                    <option value="2:30PM">2:30 PM</option>
+                                    <option value="3:00PM">3:00 PM</option>
+                                    <option value="3:30PM">3:30 PM</option>
+                                    <option value="4:00PM">4:00 PM</option>
+                                    <option value="4:30PM">4:30 PM</option>
+                                    <option value="5:00PM">5:00 PM</option>
+                                    <option value="5:30PM">5:30 PM</option>
+                                    <option value="6:00PM">6:00 PM</option>
+                                    <option value="6:30PM">6:30 PM</option>
+                                    <option value="7:00PM">7:00 PM</option>
+                                    <option value="7:30PM">7:30 PM</option>
+                                    <option value="8:00PM">8:00 PM</option>
+                                    <option value="8:30PM">8:30 PM</option>
+                                    <option value="9:00PM">9:00 PM</option>
+                                    <option value="9:30PM">9:30 PM</option>
+                                    <option value="10:00PM">10:00 PM</option>
+                                    <option value="10:30PM">10:30 PM</option>
+                                    <option value="11:00PM">11:00 PM</option>
+                                    <option value="11:30PM">11:30 PM</option>
+                                  </select>
                                 </div>
                               </div>
                             </div>
-                            <div className="col-lg-4 col-sm-5 ps-0">
-                              <div className="input-box">
-                                <label className="label-text">{t('common.time')}</label>
-                                <div className="form-group select2-container-wrapper">
-                                  <div className="select-contain select-contain-shadow w-auto">
-                                    <select
-                                      className="select-contain-select"
-                                      name="pickup_time"
-                                      value={formData.pickup_time}
-                                      onChange={handleInputChange}
-                                    >
-                                      <option value="12:00AM">12:00 AM</option>
-                                      <option value="12:30AM">12:30 AM</option>
-                                      <option value="1:00AM">1:00 AM</option>
-                                      <option value="1:30AM">1:30 AM</option>
-                                      <option value="2:00AM">2:00 AM</option>
-                                      <option value="2:30AM">2:30 AM</option>
-                                      <option value="3:00AM">3:00 AM</option>
-                                      <option value="3:30AM">3:30 AM</option>
-                                      <option value="4:00AM">4:00 AM</option>
-                                      <option value="4:30AM">4:30 AM</option>
-                                      <option value="5:00AM">5:00 AM</option>
-                                      <option value="5:30AM">5:30 AM</option>
-                                      <option value="6:00AM">6:00 AM</option>
-                                      <option value="6:30AM">6:30 AM</option>
-                                      <option value="7:00AM">7:00 AM</option>
-                                      <option value="7:30AM">7:30 AM</option>
-                                      <option value="8:00AM">8:00 AM</option>
-                                      <option value="8:30AM">8:30 AM</option>
-                                      <option value="9:00AM">9:00 AM</option>
-                                      <option value="9:30AM">9:30 AM</option>
-                                      <option value="10:00AM">10:00 AM</option>
-                                      <option value="10:30AM">10:30 AM</option>
-                                      <option value="11:00AM">11:00 AM</option>
-                                      <option value="11:30AM">11:30 AM</option>
-                                      <option value="12:00PM">12:00 PM</option>
-                                      <option value="12:30PM">12:30 PM</option>
-                                      <option value="1:00PM">1:00 PM</option>
-                                      <option value="1:30PM">1:30 PM</option>
-                                      <option value="2:00PM">2:00 PM</option>
-                                      <option value="2:30PM">2:30 PM</option>
-                                      <option value="3:00PM">3:00 PM</option>
-                                      <option value="3:30PM">3:30 PM</option>
-                                      <option value="4:00PM">4:00 PM</option>
-                                      <option value="4:30PM">4:30 PM</option>
-                                      <option value="5:00PM">5:00 PM</option>
-                                      <option value="5:30PM">5:30 PM</option>
-                                      <option value="6:00PM">6:00 PM</option>
-                                      <option value="6:30PM">6:30 PM</option>
-                                      <option value="7:00PM">7:00 PM</option>
-                                      <option value="7:30PM">7:30 PM</option>
-                                      <option value="8:00PM">8:00 PM</option>
-                                      <option value="8:30PM">8:30 PM</option>
-                                      <option value="9:00PM">9:00 PM</option>
-                                      <option value="9:30PM">9:30 PM</option>
-                                      <option value="10:00PM">10:00 PM</option>
-                                      <option value="10:30PM">10:30 PM</option>
-                                      <option value="11:00PM">11:00 PM</option>
-                                      <option value="11:30PM">11:30 PM</option>
-                                    </select>
-                                  </div>
-                                </div>
+                          </div>
+                          <div className="col-lg-8 col-sm-7">
+                            <div className="input-box">
+                              <label className="label-text">{t('hero.dropoff_date')}</label>
+                              <div className="form-group">
+                                <span className="la la-calendar form-icon"></span>
+                                <input
+                                  className="form-control"
+                                  type="date"
+                                  name="dropoff_date"
+                                  value={formData.dropoff_date}
+                                  onChange={handleInputChange}
+                                />
                               </div>
                             </div>
-                            <div className="col-lg-8 col-sm-7">
-                              <div className="input-box">
-                                <label className="label-text">{t('hero.dropoff_date')}</label>
-                                <div className="form-group">
-                                  <span className="la la-calendar form-icon"></span>
-                                  <input
-                                    className="form-control"
-                                    type="date"
-                                    name="dropoff_date"
-                                    value={formData.dropoff_date}
+                          </div>
+                          <div className="col-lg-4 col-sm-5 ps-0">
+                            <div className="input-box">
+                              <label className="label-text">{t('common.time')}</label>
+                              <div className="form-group select2-container-wrapper">
+                                <div className="select-contain select-contain-shadow w-auto">
+                                  <select
+                                    className="select-contain-select"
+                                    name="dropoff_time"
+                                    value={formData.dropoff_time}
                                     onChange={handleInputChange}
-                                  />
+                                  >
+                                    <option value="12:00AM">12:00 AM</option>
+                                    <option value="12:30AM">12:30 AM</option>
+                                    <option value="1:00AM">1:00 AM</option>
+                                    <option value="1:30AM">1:30 AM</option>
+                                    <option value="2:00AM">2:00 AM</option>
+                                    <option value="2:30AM">2:30 AM</option>
+                                    <option value="3:00AM">3:00 AM</option>
+                                    <option value="3:30AM">3:30 AM</option>
+                                    <option value="4:00AM">4:00 AM</option>
+                                    <option value="4:30AM">4:30 AM</option>
+                                    <option value="5:00AM">5:00 AM</option>
+                                    <option value="5:30AM">5:30 AM</option>
+                                    <option value="6:00AM">6:00 AM</option>
+                                    <option value="6:30AM">6:30 AM</option>
+                                    <option value="7:00AM">7:00 AM</option>
+                                    <option value="7:30AM">7:30 AM</option>
+                                    <option value="8:00AM">8:00 AM</option>
+                                    <option value="8:30AM">8:30 AM</option>
+                                    <option value="9:00AM">9:00 AM</option>
+                                    <option value="9:30AM">9:30 AM</option>
+                                    <option value="10:00AM">10:00 AM</option>
+                                    <option value="10:30AM">10:30 AM</option>
+                                    <option value="11:00AM">11:00 AM</option>
+                                    <option value="11:30AM">11:30 AM</option>
+                                    <option value="12:00PM">12:00 PM</option>
+                                    <option value="12:30PM">12:30 PM</option>
+                                    <option value="1:00PM">1:00 PM</option>
+                                    <option value="1:30PM">1:30 PM</option>
+                                    <option value="2:00PM">2:00 PM</option>
+                                    <option value="2:30PM">2:30 PM</option>
+                                    <option value="3:00PM">3:00 PM</option>
+                                    <option value="3:30PM">3:30 PM</option>
+                                    <option value="4:00PM">4:00 PM</option>
+                                    <option value="4:30PM">4:30 PM</option>
+                                    <option value="5:00PM">5:00 PM</option>
+                                    <option value="5:30PM">5:30 PM</option>
+                                    <option value="6:00PM">6:00 PM</option>
+                                    <option value="6:30PM">6:30 PM</option>
+                                    <option value="7:00PM">7:00 PM</option>
+                                    <option value="7:30PM">7:30 PM</option>
+                                    <option value="8:00PM">8:00 PM</option>
+                                    <option value="8:30PM">8:30 PM</option>
+                                    <option value="9:00PM">9:00 PM</option>
+                                    <option value="9:30PM">9:30 PM</option>
+                                    <option value="10:00PM">10:00 PM</option>
+                                    <option value="10:30PM">10:30 PM</option>
+                                    <option value="11:00PM">11:00 PM</option>
+                                    <option value="11:30PM">11:30 PM</option>
+                                  </select>
                                 </div>
                               </div>
                             </div>
-                            <div className="col-lg-4 col-sm-5 ps-0">
-                              <div className="input-box">
-                                <label className="label-text">{t('common.time')}</label>
-                                <div className="form-group select2-container-wrapper">
-                                  <div className="select-contain select-contain-shadow w-auto">
-                                    <select
-                                      className="select-contain-select"
-                                      name="dropoff_time"
-                                      value={formData.dropoff_time}
-                                      onChange={handleInputChange}
-                                    >
-                                      <option value="12:00AM">12:00 AM</option>
-                                      <option value="12:30AM">12:30 AM</option>
-                                      <option value="1:00AM">1:00 AM</option>
-                                      <option value="1:30AM">1:30 AM</option>
-                                      <option value="2:00AM">2:00 AM</option>
-                                      <option value="2:30AM">2:30 AM</option>
-                                      <option value="3:00AM">3:00 AM</option>
-                                      <option value="3:30AM">3:30 AM</option>
-                                      <option value="4:00AM">4:00 AM</option>
-                                      <option value="4:30AM">4:30 AM</option>
-                                      <option value="5:00AM">5:00 AM</option>
-                                      <option value="5:30AM">5:30 AM</option>
-                                      <option value="6:00AM">6:00 AM</option>
-                                      <option value="6:30AM">6:30 AM</option>
-                                      <option value="7:00AM">7:00 AM</option>
-                                      <option value="7:30AM">7:30 AM</option>
-                                      <option value="8:00AM">8:00 AM</option>
-                                      <option value="8:30AM">8:30 AM</option>
-                                      <option value="9:00AM">9:00 AM</option>
-                                      <option value="9:30AM">9:30 AM</option>
-                                      <option value="10:00AM">10:00 AM</option>
-                                      <option value="10:30AM">10:30 AM</option>
-                                      <option value="11:00AM">11:00 AM</option>
-                                      <option value="11:30AM">11:30 AM</option>
-                                      <option value="12:00PM">12:00 PM</option>
-                                      <option value="12:30PM">12:30 PM</option>
-                                      <option value="1:00PM">1:00 PM</option>
-                                      <option value="1:30PM">1:30 PM</option>
-                                      <option value="2:00PM">2:00 PM</option>
-                                      <option value="2:30PM">2:30 PM</option>
-                                      <option value="3:00PM">3:00 PM</option>
-                                      <option value="3:30PM">3:30 PM</option>
-                                      <option value="4:00PM">4:00 PM</option>
-                                      <option value="4:30PM">4:30 PM</option>
-                                      <option value="5:00PM">5:00 PM</option>
-                                      <option value="5:30PM">5:30 PM</option>
-                                      <option value="6:00PM">6:00 PM</option>
-                                      <option value="6:30PM">6:30 PM</option>
-                                      <option value="7:00PM">7:00 PM</option>
-                                      <option value="7:30PM">7:30 PM</option>
-                                      <option value="8:00PM">8:00 PM</option>
-                                      <option value="8:30PM">8:30 PM</option>
-                                      <option value="9:00PM">9:00 PM</option>
-                                      <option value="9:30PM">9:30 PM</option>
-                                      <option value="10:00PM">10:00 PM</option>
-                                      <option value="10:30PM">10:30 PM</option>
-                                      <option value="11:00PM">11:00 PM</option>
-                                      <option value="11:30PM">11:30 PM</option>
-                                    </select>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </form>
-                        </GoogleMapsLoader>
+                          </div>
+                        </form>
                       </div>
                       {/* Advanced options removed as requested */}
                       <div className="btn-box pt-3">
